@@ -1,4 +1,5 @@
 name: head
+complexity: O(1)
 code: |
     head :: [a] -> [a]
     head (x:_) = x

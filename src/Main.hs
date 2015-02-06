@@ -13,19 +13,22 @@ import           Text.Printf
 
 data Entry = Entry
   {
-    functionName :: String
-  , functionCode :: String
+    functionName       :: String
+  , functionComplexity :: Maybe String
+  , functionCode       :: String
   }
 
 instance FromJSON Entry where
     parseJSON (Object v) = Entry
-      <$> v .: "name"
-      <*> v .: "code"
+      <$> v .:  "name"
+      <*> v .:? "complexity"
+      <*> v .:  "code"
     parseJSON _          = mzero
 
 showEntry :: Entry -> String
 showEntry e =
   printf "function name: %s\n" (functionName e) ++
+  maybe "" (printf "complexity: %s\n") (functionComplexity e) ++
   "implementation:\n\n" ++
   (unlines . map ("    " ++) . lines $ functionCode e)
 
