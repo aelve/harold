@@ -1,4 +1,6 @@
 - name: head
+  package: base
+  modules: [Prelude, Data.List]
   complexity: O(1)
   code: |
       head :: [a] -> a
@@ -6,6 +8,8 @@
       head _     = error "Prelude.head: empty list"
 
 - name: tail
+  package: base
+  modules: [Prelude, Data.List]
   complexity: O(1)
   code: |
       tail :: [a] -> [a]
@@ -13,6 +17,8 @@
       tail _      = error "Prelude.tail: empty list"
 
 - name: last
+  package: base
+  modules: [Prelude, Data.List]
   complexity: O(n)
   code: |
       last :: [a] -> a
@@ -21,6 +27,8 @@
       last []     = error "Prelude.last: empty list"
 
 - name: init
+  package: base
+  modules: [Prelude, Data.List]
   complexity: O(n)
   code: |
       init :: [a] -> [a]
@@ -29,12 +37,16 @@
       init []     = error "Prelude.init: empty list"
 
 - name: map
+  package: base
+  modules: [Prelude, Data.List]
   code: |
       map :: (a -> b) -> [a] -> [b]
       map _ []     = []
       map f (x:xs) = f x : map f xs
 
 - name: (++)
+  package: base
+  modules: [Prelude, Data.List]
   complexity: O(n), where n is length of 1st argument
   code: |
       (++) :: [a] -> [a] -> [a]
@@ -42,6 +54,8 @@
       (++) (x:xs) ys = x : xs ++ ys
 
 - name: filter
+  package: base
+  modules: [Prelude, Data.List]
   code: |
       filter :: (a -> Bool) -> [a] -> [a]
       filter _ []     = []
@@ -50,6 +64,8 @@
         | otherwise   = filter p xs
 
 - name: "null"              # Without quotes it's an actual 'null' value.
+  package: base
+  modules: [Prelude, Data.List]
   complexity: O(1)
   code: |
       null :: [a] -> Bool
@@ -57,6 +73,8 @@
       null _  = False
 
 - name: length
+  package: base
+  modules: [Prelude, Data.List]
   complexity: O(n)
   code: |
       length :: [a] -> Int
@@ -64,6 +82,8 @@
       length (_:xs) = 1 + length xs
 
 - name: (!!)
+  package: base
+  modules: [Prelude, Data.List]
   complexity: O(index)
   code: |
       (!!) :: [a] -> Int -> a
@@ -73,6 +93,8 @@
       (_:xs) !! n         = xs !! (n-1)
 
 - name: reverse
+  package: base
+  modules: [Prelude, Data.List]
   complexity: O(n)
   code: |
       reverse :: [a] -> [a]

@@ -14,6 +14,8 @@ import           Text.Printf
 data Entry = Entry
   {
     functionName       :: String
+  , functionPackage    :: String
+  , functionModules    :: [String]
   , functionComplexity :: Maybe String
   , functionCode       :: String
   }
@@ -21,13 +23,18 @@ data Entry = Entry
 instance FromJSON Entry where
     parseJSON (Object v) = Entry
       <$> v .:  "name"
+      <*> v .:  "package"
+      <*> v .:  "modules"
       <*> v .:? "complexity"
       <*> v .:  "code"
     parseJSON _          = mzero
 
 showEntry :: Entry -> String
 showEntry e =
-  printf "function name: %s\n" (functionName e) ++
+  printf "function: %s\n" (functionName e) ++
+  printf "available from: %s (%s)\n"
+    (functionPackage e)
+    (intercalate ", " $ functionModules e) ++
   maybe "" (printf "complexity: %s\n") (functionComplexity e) ++
   "implementation:\n\n" ++
   (unlines . map ("    " ++) . lines $ functionCode e)
