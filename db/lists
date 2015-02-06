@@ -1,7 +1,7 @@
 - name: head
   complexity: O(1)
   code: |
-      head :: [a] -> [a]
+      head :: [a] -> a
       head (x:_) = x
       head _     = error "Prelude.head: empty list"
 
@@ -11,3 +11,19 @@
       tail :: [a] -> [a]
       tail (_:xs) = xs
       tail _      = error "Prelude.tail: empty list"
+
+- name: last
+  complexity: O(n)
+  code: |
+      last :: [a] -> a
+      last [x]    = x
+      last (_:xs) = last xs
+      last []     = error "Prelude.last: empty list"
+
+- name: init
+  complexity: O(n)
+  code: |
+      init :: [a] -> [a]
+      init [x]    = []
+      init (x:xs) = x : init xs
+      init []     = error "Prelude.init: empty list"
