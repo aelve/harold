@@ -9,6 +9,8 @@
         head (x:_) = x
         head []    = error "Prelude.head: empty list"
 
+######################################################################
+
 - name: tail
   package: base
   modules: [Prelude, Data.List]
@@ -19,6 +21,8 @@
       code: |
         tail (_:xs) = xs
         tail []     = error "Prelude.tail: empty list"
+
+######################################################################
 
 - name: last
   package: base
@@ -32,6 +36,8 @@
         last (_:xs) = last xs
         last []     = error "Prelude.last: empty list"
 
+######################################################################
+
 - name: init
   package: base
   modules: [Prelude, Data.List]
@@ -44,6 +50,8 @@
         init (x:xs) = x : init xs
         init []     = error "Prelude.init: empty list"
 
+######################################################################
+
 - name: map
   package: base
   modules: [Prelude, Data.List]
@@ -53,6 +61,8 @@
       code: |
         map f []     = []
         map f (x:xs) = f x : map f xs
+
+######################################################################
 
 - name: (++)
   package: base
@@ -65,6 +75,8 @@
         []     ++ ys = ys
         (x:xs) ++ ys = x : (xs ++ ys)
 
+######################################################################
+
 - name: filter
   package: base
   modules: [Prelude, Data.List]
@@ -76,7 +88,9 @@
         filter p (x:xs) | p x       = x : filter p xs
                         | otherwise = filter p xs
 
-- name: "null"              # Without quotes it's an actual 'null' value.
+######################################################################
+
+- name: "null"           # Without quotes it's an actual 'null' value.
   package: base
   modules: [Prelude, Data.List]
   complexity: O(1)
@@ -86,6 +100,8 @@
       code: |
         null []    = True
         null (_:_) = False
+
+######################################################################
 
 - name: length
   package: base
@@ -97,6 +113,8 @@
       code: |
         length []     = 0
         length (_:xs) = 1 + length xs
+
+######################################################################
 
 - name: (!!)
   package: base
@@ -110,6 +128,8 @@
         []     !! _         = error "Prelude.!!: index too large"
         (x:_)  !! 0         = x
         (_:xs) !! n         = xs !! (n-1)
+
+######################################################################
 
 - name: reverse
   package: base
@@ -133,3 +153,512 @@
           where
             rev []     acc = acc
             rev (x:xs) acc = rev xs (x:acc)
+
+######################################################################
+
+- name: concat
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "[[a]] -> [a]"
+      code: |
+        concat xss = foldr (++) [] xss
+
+######################################################################
+
+- name: concatMap
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> [b]) -> [a] -> [b]"
+      code: |
+        concatMap f = concat . map f
+
+######################################################################
+
+- name: foldl
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> b -> a) -> a -> [b] -> a"
+      code: |
+        foldl f z []     = z
+        foldl f z (x:xs) = foldl f (f z x) xs
+
+######################################################################
+
+- name: foldl1
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> a -> a) -> [a] -> a"
+      code: |
+        foldl1 f (x:xs) = foldl f x xs
+        foldl1 _ []     = error "Prelude.foldl1: empty list"
+
+######################################################################
+
+- name: scanl
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> b -> a) -> a -> [b] -> [a]"
+      code: |
+        scanl f q xs = q : (case xs of
+                              []   -> []
+                              x:xs -> scanl f (f q x) xs)
+
+######################################################################
+
+- name: scanl1
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> a -> a) -> [a] -> [a]"
+      code: |
+        scanl1 f (x:xs) = scanl f x xs
+        scanl1 _ []     = []
+
+######################################################################
+
+- name: foldr
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> b -> b) -> b -> [a] -> b"
+      code: |
+        foldr f z []     = z
+        foldr f z (x:xs) = f x (foldr f z xs)
+
+######################################################################
+
+- name: foldr1
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> a -> a) -> [a] -> a"
+      code: |
+        foldr1 f [x]     =  x
+        foldr1 f (x:xs)  =  f x (foldr1 f xs)
+        foldr1 _ []      =  error "Prelude.foldr1: empty list"
+
+######################################################################
+
+- name: scanr
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> b -> b) -> b -> [a] -> [b]"
+      code: |
+        scanr f q0 []     = [q0]
+        scanr f q0 (x:xs) = f x q : qs
+          where
+            qs@(q:_) = scanr f q0 xs
+
+######################################################################
+
+- name: scanr1
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> a -> a) -> [a] -> [a]"
+      code: |
+        scanr1 f []     = []
+        scanr1 f [x]    = [x]
+        scanr1 f (x:xs) = f x q : qs
+          where
+            qs@(q:_) = scanr1 f xs
+
+######################################################################
+
+- name: iterate
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> a) -> a -> [a]"
+      code: |
+        iterate f x = x : iterate f (f x)
+
+######################################################################
+
+- name: repeat
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "a -> [a]"
+      code: |
+        repeat x = xs where xs = x:xs
+
+######################################################################
+
+- name: replicate
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "Int -> a -> [a]"
+      code: |
+        replicate n x = take n (repeat x)
+
+######################################################################
+
+- name: cycle
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "[a] -> [a]"
+      code: |
+        cycle [] = error "Prelude.cycle: empty list"
+        cycle xs = xs' where xs' = xs ++ xs'
+
+######################################################################
+
+- name: take
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "Int -> [a] -> [a]"
+      code: |
+        take n _      | n <= 0 = []
+        take _ []              = []
+        take n (x:xs)          = x : take (n-1) xs
+
+######################################################################
+
+- name: drop
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "Int -> [a] -> [a]"
+      code: |
+        drop n xs     | n <= 0 = xs
+        drop _ []              = []
+        drop n (_:xs)          = drop (n-1) xs
+
+######################################################################
+
+- name: splitAt
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "Int -> [a] -> ([a], [a])"
+      code: |
+        splitAt n xs = (take n xs, drop n xs)
+
+######################################################################
+
+- name: takeWhile
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> Bool) -> [a] -> [a]"
+      code: |
+        takeWhile p []     = []
+        takeWhile p (x:xs)
+          | p x            = x : takeWhile p xs
+          | otherwise      = []
+
+######################################################################
+
+- name: dropWhile
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> Bool) -> [a] -> [a]"
+      code: |
+        dropWhile p []         = []
+        dropWhile p xs@(x:xs')
+          | p x                = dropWhile p xs'
+          | otherwise          = xs
+
+######################################################################
+
+- name: span
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> Bool) -> [a] -> ([a], [a])"
+      code: |
+        span p []         = ([], [])
+        span p xs@(x:xs')
+          | p x           = (x:ys, zs)
+          | otherwise     = ([], xs)
+          where
+            (ys, zs) = span p xs'
+
+######################################################################
+
+- name: break
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> Bool) -> [a] -> ([a], [a])"
+      code: |
+        break p = span (not . p)
+
+######################################################################
+
+- name: lines
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "String -> [String]"
+      code: |
+        lines "" = []
+        lines s  = let (l, s') = break (== '\n') s
+                   in  l : case s' of
+                             []      -> []
+                             (_:s'') -> lines s''
+
+######################################################################
+
+- name: words
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "String -> [String]"
+      code: |
+        words s = case dropWhile isSpace s of
+          "" -> []
+          s' -> w : words s''
+                where (w, s'') = break isSpace s'
+
+######################################################################
+
+- name: unlines
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "[String] -> String"
+      code: |
+        unlines = concatMap (++ "\n")
+
+######################################################################
+
+- name: unwords
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "[String] -> String"
+      code: |
+        unwords [] = ""
+        unwords ws = foldr1 (\w s -> w ++ ' ':s) ws
+
+######################################################################
+
+- name: and
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "[Bool] -> Bool"
+      code: |
+        and = foldr (&&) True
+
+######################################################################
+
+- name: or
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "[Bool] -> Bool"
+      code: |
+        or = foldr (||) False
+
+######################################################################
+
+- name: any
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> Bool) -> [a] -> Bool"
+      code: |
+        any p = or . map p
+
+######################################################################
+
+- name: all
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> Bool) -> [a] -> Bool"
+      code: |
+        all p = and . map p
+
+######################################################################
+
+- name: elem
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(Eq a) => a -> [a] -> Bool"
+      code: |
+        elem x = any (== x)
+
+######################################################################
+
+- name: notElem
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(Eq a) => a -> [a] -> Bool"
+      code: |
+        notElem x = all (/= x)
+
+######################################################################
+
+- name: lookup
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(Eq a) => a -> [(a, b)] -> Maybe b"
+      code: |
+        lookup key []          = Nothing
+        lookup key ((x,y):xys)
+          | key == x           = Just y
+          | otherwise          = lookup key xys
+
+######################################################################
+
+- name: sum
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(Num a) => [a] -> a"
+      code: |
+        sum = foldl (+) 0
+
+######################################################################
+
+- name: product
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(Num a) => [a] -> a"
+      code: |
+        product = foldl (*) 1
+
+######################################################################
+
+- name: maximum
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(Ord a) => [a] -> a"
+      code: |
+        maximum [] = error "Prelude.maximum: empty list"
+        maximum xs = foldl1 max xs
+
+######################################################################
+
+- name: minimum
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(Ord a) => [a] -> a"
+      code: |
+        minimum [] = error "Prelude.minimum: empty list"
+        minimum xs = foldl1 min xs
+
+######################################################################
+
+- name: zip
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "[a] -> [b] -> [(a, b)]"
+      code: |
+        zip = zipWith (,)
+
+######################################################################
+
+- name: zip3
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "[a] -> [b] -> [c] -> [(a, b, c)]"
+      code: |
+        zip3 = zipWith3 (,,)
+
+######################################################################
+
+- name: zipWith
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> b -> c) -> [a] -> [b] -> [c]"
+      code: |
+        zipWith z (a:as) (b:bs) = z a b : zipWith z as bs
+        zipWith _ _ _ = []
+
+######################################################################
+
+- name: zipWith3
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "(a -> b -> c -> d) -> [a] -> [b] -> [c] -> [d]"
+      code: |
+        zipWith3 z (a:as) (b:bs) (c:cs) = z a b c : zipWith3 z as bs cs
+        zipWith3 _ _ _ _ = []
+
+######################################################################
+
+- name: unzip
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "[(a, b)] -> ([a], [b])"
+      code: |
+        unzip = foldr (\(a,b) ~(as,bs) -> (a:as,b:bs)) ([],[])
+
+######################################################################
+
+- name: unzip3
+  package: base
+  modules: [Prelude, Data.List]
+  implementations:
+    - name: report
+      type: "[(a, b, c)] -> ([a], [b], [c])"
+      code: |
+        unzip3 = foldr (\(a,b,c) ~(as,bs,cs) -> (a:as,b:bs,c:cs))
+                       ([],[],[])
