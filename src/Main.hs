@@ -36,11 +36,11 @@ main :: IO ()
 main = do
   let isRegularFile = (== Find.RegularFile) <$> Find.fileType
   files <- Find.find (return True) isRegularFile "db"
-  entries <- fmap catMaybes $ forM files $ \f -> do
-    res <- decodeFileEither f
-    case res of
-      Left  err   -> printf "%s: %s" f (show err) >> return Nothing
-      Right entry -> return (Just entry)
+  entries <- fmap concat $ forM files $ \f -> do
+    mbRes <- decodeFileEither f
+    case mbRes of
+      Left  err -> printf "%s: %s" f (show err) >> return []
+      Right res -> return res
   repl entries
 
 repl :: [Entry] -> IO ()

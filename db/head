@@ -1,6 +1,0 @@
-name: head
-complexity: O(1)
-code: |
-    head :: [a] -> [a]
-    head (x:_) = x
-    head _     = error "Prelude.head: empty list"

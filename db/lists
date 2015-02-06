@@ -1,0 +1,13 @@
+- name: head
+  complexity: O(1)
+  code: |
+      head :: [a] -> [a]
+      head (x:_) = x
+      head _     = error "Prelude.head: empty list"
+
+- name: tail
+  complexity: O(1)
+  code: |
+      tail :: [a] -> [a]
+      tail (_:xs) = xs
+      tail _      = error "Prelude.tail: empty list"
