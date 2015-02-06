@@ -1,0 +1,5 @@
+name: head
+code: |
+    head :: [a] -> [a]
+    head (x:_) = x
+    head _     = error "Prelude.head: empty list"
