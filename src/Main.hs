@@ -13,21 +13,36 @@ import           Text.Printf
 
 data Entry = Entry
   {
-    functionName       :: String
-  , functionPackage    :: String
-  , functionModules    :: [String]
-  , functionComplexity :: Maybe String
-  , functionCode       :: String
+    functionName            :: String
+  , functionPackage         :: String
+  , functionModules         :: [String]
+  , functionImplementations :: [Implementation]
+  }
+
+data Implementation = Implementation
+  {
+    implementationName       :: String
+  , implementationComplexity :: Maybe String
+  , implementationCode       :: String
   }
 
 instance FromJSON Entry where
-    parseJSON (Object v) = Entry
-      <$> v .:  "name"
-      <*> v .:  "package"
-      <*> v .:  "modules"
-      <*> v .:? "complexity"
-      <*> v .:  "code"
-    parseJSON _          = mzero
+  parseJSON (Object v) = Entry
+    <$> v .: "name"
+    <*> v .: "package"
+    <*> v .: "modules"
+    <*> v .: "implementations"
+  parseJSON _          = mzero
+
+instance FromJSON Implementation where
+  parseJSON (Object v) = Implementation
+    <$> v .:  "name"
+    <*> v .:? "complexity"
+    <*> v .:  "code"
+  parseJSON _          = mzero
+
+indent :: Int -> String -> String
+indent n = unlines . map (replicate n ' ' ++) . lines
 
 showEntry :: Entry -> String
 showEntry e =
@@ -35,9 +50,16 @@ showEntry e =
   printf "available from: %s (%s)\n"
     (functionPackage e)
     (intercalate ", " $ functionModules e) ++
-  maybe "" (printf "complexity: %s\n") (functionComplexity e) ++
-  "implementation:\n\n" ++
-  (unlines . map ("    " ++) . lines $ functionCode e)
+  "implementations:\n\n" ++
+  intercalate "\n" (map (indent 2 . showImplementation) 
+                        (functionImplementations e))
+
+showImplementation :: Implementation -> String
+showImplementation e =
+  printf "%s:\n" (implementationName e) ++
+  maybe "" (printf "  complexity: %s\n") (implementationComplexity e) ++
+  "  code:\n" ++
+  indent 4 (implementationCode e)
 
 main :: IO ()
 main = do

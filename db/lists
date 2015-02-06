@@ -1,101 +1,136 @@
 - name: head
   package: base
   modules: [Prelude, Data.List]
-  complexity: O(1)
-  code: |
-      head :: [a] -> a
-      head (x:_) = x
-      head _     = error "Prelude.head: empty list"
+  implementations:
+    - name: report
+      complexity: O(1)
+      code: |
+        head :: [a] -> a
+        head (x:_) = x
+        head []    = error "Prelude.head: empty list"
 
 - name: tail
   package: base
   modules: [Prelude, Data.List]
-  complexity: O(1)
-  code: |
-      tail :: [a] -> [a]
-      tail (_:xs) = xs
-      tail _      = error "Prelude.tail: empty list"
+  implementations:
+    - name: report
+      complexity: O(1)
+      code: |
+        tail :: [a] -> [a]
+        tail (_:xs) = xs
+        tail []     = error "Prelude.tail: empty list"
 
 - name: last
   package: base
   modules: [Prelude, Data.List]
-  complexity: O(n)
-  code: |
-      last :: [a] -> a
-      last [x]    = x
-      last (_:xs) = last xs
-      last []     = error "Prelude.last: empty list"
+  implementations:
+    - name: report
+      complexity: O(n)
+      code: |
+        last :: [a] -> a
+        last [x]    = x
+        last (_:xs) = last xs
+        last []     = error "Prelude.last: empty list"
 
 - name: init
   package: base
   modules: [Prelude, Data.List]
-  complexity: O(n)
-  code: |
-      init :: [a] -> [a]
-      init [x]    = []
-      init (x:xs) = x : init xs
-      init []     = error "Prelude.init: empty list"
+  implementations:
+    - name: report
+      complexity: O(n)
+      code: |
+        init :: [a] -> [a]
+        init [x]    = []
+        init (x:xs) = x : init xs
+        init []     = error "Prelude.init: empty list"
 
 - name: map
   package: base
   modules: [Prelude, Data.List]
-  code: |
-      map :: (a -> b) -> [a] -> [b]
-      map _ []     = []
-      map f (x:xs) = f x : map f xs
+  implementations:
+    - name: report
+      code: |
+        map :: (a -> b) -> [a] -> [b]
+        map f []     = []
+        map f (x:xs) = f x : map f xs
 
 - name: (++)
   package: base
   modules: [Prelude, Data.List]
-  complexity: O(n), where n is length of 1st argument
-  code: |
-      (++) :: [a] -> [a] -> [a]
-      (++) []     ys = ys
-      (++) (x:xs) ys = x : xs ++ ys
+  implementations:
+    - name: report
+      complexity: O(n), where n is length of 1st argument
+      code: |
+        (++) :: [a] -> [a] -> [a]
+        []     ++ ys = ys
+        (x:xs) ++ ys = x : (xs ++ ys)
 
 - name: filter
   package: base
   modules: [Prelude, Data.List]
-  code: |
-      filter :: (a -> Bool) -> [a] -> [a]
-      filter _ []     = []
-      filter p (x:xs)
-        | p x         = x : filter p xs
-        | otherwise   = filter p xs
+  implementations:
+    - name: report
+      code: |
+        filter :: (a -> Bool) -> [a] -> [a]
+        filter p []                 = []
+        filter p (x:xs) | p x       = x : filter p xs
+                        | otherwise = filter p xs
 
 - name: "null"              # Without quotes it's an actual 'null' value.
   package: base
   modules: [Prelude, Data.List]
-  complexity: O(1)
-  code: |
-      null :: [a] -> Bool
-      null [] = True
-      null _  = False
+  implementations:
+    - name: report
+      complexity: O(1)
+      code: |
+        null :: [a] -> Bool
+        null []    = True
+        null (_:_) = False
 
 - name: length
   package: base
   modules: [Prelude, Data.List]
-  complexity: O(n)
-  code: |
-      length :: [a] -> Int
-      length []     = 0
-      length (_:xs) = 1 + length xs
+  implementations:
+    - name: report
+      complexity: O(n)
+      code: |
+        length :: [a] -> Int
+        length []     = 0
+        length (_:xs) = 1 + length xs
 
 - name: (!!)
   package: base
   modules: [Prelude, Data.List]
-  complexity: O(index)
-  code: |
-      (!!) :: [a] -> Int -> a
-      xs     !! n | n < 0 = error "Prelude.!!: negative index"
-      []     !! _         = error "Prelude.!!: index too large"
-      (x:_)  !! 0         = x
-      (_:xs) !! n         = xs !! (n-1)
+  implementations:
+    - name: report
+      complexity: O(index)
+      code: |
+        (!!) :: [a] -> Int -> a
+        xs     !! n | n < 0 = error "Prelude.!!: negative index"
+        []     !! _         = error "Prelude.!!: index too large"
+        (x:_)  !! 0         = x
+        (_:xs) !! n         = xs !! (n-1)
 
 - name: reverse
   package: base
   modules: [Prelude, Data.List]
-  complexity: O(n)
-  code: |
-      reverse :: [a] -> [a]
-      reverse = foldl (flip (:)) []
+  implementations:
+    - name: report
+      complexity: O(n)
+      code: |
+        reverse :: [a] -> [a]
+        reverse = foldl (flip (:)) []
+    - name: naive
+      complexity: O(n²)
+      code: |
+        reverse :: [a] -> [a]
+        reverse []     = []
+        reverse (x:xs) = reverse xs ++ [x]
+    - name: with accumulator
+      complexity: O(n)
+      code: |
+        reverse :: [a] -> [a]
+        reverse s = rev s []
+          where
+            rev []     acc = acc
+            rev (x:xs) acc = rev xs (x:acc)
