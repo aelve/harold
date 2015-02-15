@@ -1,6 +1,6 @@
 - name: subtract
-  package: base
-  modules: [Prelude]
+  location:
+    - modules: [Prelude]
   implementations:
     - name: report
       type: "(Num a) => a -> a -> a"
@@ -10,8 +10,8 @@
 ######################################################################
 
 - name: even
-  package: base
-  modules: [Prelude]
+  location:
+    - modules: [Prelude]
   implementations:
     - name: report
       type: "(Integral a) => a -> Bool"
@@ -21,8 +21,8 @@
 ######################################################################
 
 - name: odd
-  package: base
-  modules: [Prelude]
+  location:
+    - modules: [Prelude]
   implementations:
     - name: report
       type: "(Integral a) => a -> Bool"
@@ -32,8 +32,8 @@
 ######################################################################
 
 - name: gcd
-  package: base
-  modules: [Prelude]
+  location:
+    - modules: [Prelude]
   implementations:
     - name: report
       type: "(Integral a) => a -> a -> a"
@@ -47,8 +47,8 @@
 ######################################################################
 
 - name: lcm
-  package: base
-  modules: [Prelude]
+  location:
+    - modules: [Prelude]
   implementations:
     - name: report
       type: "(Integral a) => a -> a -> a"
@@ -60,8 +60,8 @@
 ######################################################################
 
 - name: (^)
-  package: base
-  modules: [Prelude]
+  location:
+    - modules: [Prelude]
   implementations:
     - name: report
       type: "(Num a, Integral b) => a -> b -> a"
@@ -78,8 +78,8 @@
 ######################################################################
 
 - name: (^^)
-  package: base
-  modules: [Prelude]
+  location:
+    - modules: [Prelude]
   implementations:
     - name: report
       type: "(Fractional a, Integral b) => a -> b -> a"
@@ -89,8 +89,8 @@
 ######################################################################
 
 - name: fromIntegral
-  package: base
-  modules: [Prelude]
+  location:
+    - modules: [Prelude]
   implementations:
     - name: report
       type: "(Integral a, Num b) => a -> b"
@@ -100,8 +100,8 @@
 ######################################################################
 
 - name: realToFrac
-  package: base
-  modules: [Prelude]
+  location:
+    - modules: [Prelude]
   implementations:
     - name: report
       type: "(Real a, Fractional b) => a -> b"

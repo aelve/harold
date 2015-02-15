@@ -1,6 +1,6 @@
 - name: fst
-  package: base
-  modules: [Prelude, Data.Tuple]
+  location:
+    - modules: [Prelude, Data.Tuple]
   implementations:
     - name: report
       type: "(a, b) -> a"
@@ -10,8 +10,8 @@
 ######################################################################
 
 - name: snd
-  package: base
-  modules: [Prelude, Data.Tuple]
+  location:
+    - modules: [Prelude, Data.Tuple]
   implementations:
     - name: report
       type: "(a, b) -> b"
@@ -21,8 +21,8 @@
 ######################################################################
 
 - name: curry
-  package: base
-  modules: [Prelude, Data.Tuple]
+  location:
+    - modules: [Prelude, Data.Tuple]
   implementations:
     - name: report
       type: "((a, b) -> c) -> a -> b -> c"
@@ -32,8 +32,8 @@
 ######################################################################
 
 - name: uncurry
-  package: base
-  modules: [Prelude, Data.Tuple]
+  location:
+    - modules: [Prelude, Data.Tuple]
   implementations:
     - name: report
       type: "(a -> b -> c) -> ((a, b) -> c)"

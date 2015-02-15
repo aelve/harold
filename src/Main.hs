@@ -5,18 +5,62 @@ module Main where
 import           Control.Applicative
 import           Control.Monad
 import           Data.List (intercalate, nub)
+import           Data.List.Split (chunksOf)
 import           Data.Maybe
 import           Data.Yaml
 import qualified System.FilePath.Find as Find
 import           System.IO
 import           Text.Printf
 
+type Version = String
+
+-- | Version ranges in which a function or whatever was available. The 1st
+-- version is when something was introduces, the 2nd - when it was removed,
+-- the 3rd - when it was introduced again, etc.
+type VersionRanges = [Version]
+
+-- | Display version ranges in a human-readable way.
+--
+-- >>> showVersionRanges ["4.2"]
+-- "since v4.2"
+--
+-- >>> showVersionRanges ["", "4.2"]
+-- "removed in v4.2"
+--
+-- >>> showVersionRanges ["1.3.3", "4.2"]
+-- "introduced in v1.3.3, removed in v4.2"
+--
+-- >>> showVersionRanges ["", "1.3.3", "4.2"]
+-- "was removed in v1.3.3, reintroduced in v4.2"
+--
+showVersionRanges :: VersionRanges -> String
+showVersionRanges vs = case vs of
+  []         -> ""
+  [""]       -> ""
+  [v]        -> printf "since v%s" v
+  ["", u]    -> printf "removed in v%s" u
+  [v, u]     -> printf "introduced in v%s, removed in v%s" v u
+  ["", u, v] -> printf "was removed in v%s, reintroduced in v%s" u v
+  vus        -> "present in versions " ++
+                intercalate ", " (map showRange (chunksOf 2 vus))
+                where
+                  showRange ["", u] = "0–" ++ u
+                  showRange [v,  u] = v ++ "–" ++ u
+                  showRange [v]     = v ++ " and onwards"
+
+-- | Location of an 'Entry' – package and modules containing it, along with
+-- versions of the package for which it holds true.
+data Location = Location {
+    locPackage  :: String
+  , locModules  :: [String]
+  , locVersions :: VersionRanges
+  }
+
 -- | An entry in the knowledge base.
 data Entry
   = Function {
       entryName               :: String
-    , entryPackage            :: String
-    , entryModules            :: [String]
+    , entryLocation           :: [Location]
     -- | Asymptotic complexity of the function. It's not a field of
     -- 'FunctionImplementation' because we want to distinguish between
     -- "default" complexity and "weird" complexity, but it's done wrong anyway
@@ -27,8 +71,7 @@ data Entry
     }
   | Class {
       entryName               :: String
-    , entryPackage            :: String
-    , entryModules            :: [String]
+    , entryLocation           :: [Location]
     -- | Implementations of the class.
     , classImpls              :: [ClassImpl]
     }
@@ -63,19 +106,26 @@ data ClassMethod = ClassMethod {
   , classMethodType     :: String
   }
 
+-- | The default package name is "base". The default version range is "always
+-- been there".
+instance FromJSON Location where
+  parseJSON (Object v) = Location
+    <$> v .:? "package" .!= "base"
+    <*> v .:  "modules"
+    <*> v .:? "versions" .!= []
+  parseJSON _          = mzero
+
 instance FromJSON Entry where
   parseJSON (Object v) = parseFunction <|> parseClass
     where
       parseFunction = Function
         <$> v .:  "name"
-        <*> v .:  "package"
-        <*> v .:  "modules"
+        <*> v .:  "location"
         <*> v .:? "complexity"
         <*> v .:  "implementations"
       parseClass = Class
         <$> v .:  "name"
-        <*> v .:  "package"
-        <*> v .:  "modules"
+        <*> v .:  "location"
         <*> v .:  "implementations"
   parseJSON _          = mzero
 
@@ -103,27 +153,36 @@ instance FromJSON ClassMethod where
 indent :: Int -> String -> String
 indent n = unlines . map (replicate n ' ' ++) . lines
 
+-- | Produces stuff like "base (Prelude, Data.List); since v4.7.0.0".
+showLocation :: Location -> String
+showLocation (Location package modules versions) =
+  package ++ " (" ++ intercalate ", " modules ++ ")" ++
+  if not (null versions) then "; " ++ showVersionRanges versions
+                         else ""
+
 -- | Produce a textual description of the entry in the knowledge base.
 showEntry :: Entry -> String
 
-showEntry (Function name pkg modules comp impls) = unlines . concat $
+showEntry (Function name locs comp impls) = unlines . concat $
   [
     [name]
   , let types = nub (map funcImplType impls)
     in  map ("  :: " ++) types
   , [""]
-  , [printf "available from %s (%s)" pkg (intercalate ", " modules)]
+  , ["available from:"]
+  , map (\l -> "  " ++ showLocation l) locs
   , [""]
   , ["implementations:"]
   , [""]
   , map (indent 2 . showFuncImpl name) impls
   ]
 
-showEntry (Class name pkg modules impls) = unlines . concat $
+showEntry (Class name locs impls) = unlines . concat $
   [
     [name]
   , [""]
-  , [printf "available from %s (%s)" pkg (intercalate ", " modules)]
+  , ["available from:"]
+  , map (\l -> "  " ++ showLocation l) locs
   , [""]
   , ["implementations:"]
   , [""]

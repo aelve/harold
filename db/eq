@@ -1,6 +1,6 @@
 - name: class Eq
-  package: base
-  modules: [Prelude, Data.Eq]
+  location:
+    - modules: [Prelude, Data.Eq]
   implementations:
     - name: report
       type: "Eq a"
@@ -13,8 +13,8 @@
 ######################################################################
 
 - name: (==)
-  package: base
-  modules: [Prelude, Data.Eq]
+  location:
+    - modules: [Prelude, Data.Eq]
   implementations:
     - name: report
       type: "(Eq a) => a -> a -> Bool"
@@ -25,8 +25,8 @@
 ######################################################################
 
 - name: (/=)
-  package: base
-  modules: [Prelude, Data.Eq]
+  location:
+    - modules: [Prelude, Data.Eq]
   implementations:
     - name: report
       type: "(Eq a) => a -> a -> Bool"

@@ -1,6 +1,6 @@
 - name: head
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   complexity: O(1)
   implementations:
     - name: report
@@ -12,8 +12,8 @@
 ######################################################################
 
 - name: tail
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   complexity: O(1)
   implementations:
     - name: report
@@ -25,8 +25,8 @@
 ######################################################################
 
 - name: last
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   complexity: O(n)
   implementations:
     - name: report
@@ -39,8 +39,8 @@
 ######################################################################
 
 - name: init
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   complexity: O(n)
   implementations:
     - name: report
@@ -53,8 +53,8 @@
 ######################################################################
 
 - name: map
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> b) -> [a] -> [b]"
@@ -65,8 +65,8 @@
 ######################################################################
 
 - name: (++)
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   complexity: O(n), where n is length of 1st argument
   implementations:
     - name: report
@@ -78,8 +78,8 @@
 ######################################################################
 
 - name: filter
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> Bool) -> [a] -> [a]"
@@ -91,8 +91,8 @@
 ######################################################################
 
 - name: "null"           # Without quotes it's an actual 'null' value.
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   complexity: O(1)
   implementations:
     - name: report
@@ -104,8 +104,8 @@
 ######################################################################
 
 - name: length
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   complexity: O(n)
   implementations:
     - name: report
@@ -117,8 +117,8 @@
 ######################################################################
 
 - name: (!!)
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   complexity: O(index)
   implementations:
     - name: report
@@ -132,8 +132,8 @@
 ######################################################################
 
 - name: reverse
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   complexity: O(n)
   implementations:
     - name: report
@@ -157,8 +157,8 @@
 ######################################################################
 
 - name: concat
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "[[a]] -> [a]"
@@ -168,8 +168,8 @@
 ######################################################################
 
 - name: concatMap
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> [b]) -> [a] -> [b]"
@@ -179,8 +179,8 @@
 ######################################################################
 
 - name: foldl
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> b -> a) -> a -> [b] -> a"
@@ -191,8 +191,8 @@
 ######################################################################
 
 - name: foldl1
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> a -> a) -> [a] -> a"
@@ -203,8 +203,8 @@
 ######################################################################
 
 - name: scanl
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> b -> a) -> a -> [b] -> [a]"
@@ -216,8 +216,8 @@
 ######################################################################
 
 - name: scanl1
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> a -> a) -> [a] -> [a]"
@@ -228,8 +228,8 @@
 ######################################################################
 
 - name: foldr
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> b -> b) -> b -> [a] -> b"
@@ -240,8 +240,8 @@
 ######################################################################
 
 - name: foldr1
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> a -> a) -> [a] -> a"
@@ -253,8 +253,8 @@
 ######################################################################
 
 - name: scanr
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> b -> b) -> b -> [a] -> [b]"
@@ -267,8 +267,8 @@
 ######################################################################
 
 - name: scanr1
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> a -> a) -> [a] -> [a]"
@@ -282,8 +282,8 @@
 ######################################################################
 
 - name: iterate
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> a) -> a -> [a]"
@@ -293,8 +293,8 @@
 ######################################################################
 
 - name: repeat
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "a -> [a]"
@@ -304,8 +304,8 @@
 ######################################################################
 
 - name: replicate
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "Int -> a -> [a]"
@@ -315,8 +315,8 @@
 ######################################################################
 
 - name: cycle
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "[a] -> [a]"
@@ -327,8 +327,8 @@
 ######################################################################
 
 - name: take
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "Int -> [a] -> [a]"
@@ -340,8 +340,8 @@
 ######################################################################
 
 - name: drop
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "Int -> [a] -> [a]"
@@ -353,8 +353,8 @@
 ######################################################################
 
 - name: splitAt
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "Int -> [a] -> ([a], [a])"
@@ -364,8 +364,8 @@
 ######################################################################
 
 - name: takeWhile
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> Bool) -> [a] -> [a]"
@@ -378,8 +378,8 @@
 ######################################################################
 
 - name: dropWhile
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> Bool) -> [a] -> [a]"
@@ -392,8 +392,8 @@
 ######################################################################
 
 - name: span
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> Bool) -> [a] -> ([a], [a])"
@@ -408,8 +408,8 @@
 ######################################################################
 
 - name: break
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> Bool) -> [a] -> ([a], [a])"
@@ -419,8 +419,8 @@
 ######################################################################
 
 - name: lines
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "String -> [String]"
@@ -434,8 +434,8 @@
 ######################################################################
 
 - name: words
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "String -> [String]"
@@ -448,8 +448,8 @@
 ######################################################################
 
 - name: unlines
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "[String] -> String"
@@ -459,8 +459,8 @@
 ######################################################################
 
 - name: unwords
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "[String] -> String"
@@ -471,8 +471,8 @@
 ######################################################################
 
 - name: and
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "[Bool] -> Bool"
@@ -482,8 +482,8 @@
 ######################################################################
 
 - name: or
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "[Bool] -> Bool"
@@ -493,8 +493,8 @@
 ######################################################################
 
 - name: any
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> Bool) -> [a] -> Bool"
@@ -504,8 +504,8 @@
 ######################################################################
 
 - name: all
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> Bool) -> [a] -> Bool"
@@ -515,8 +515,8 @@
 ######################################################################
 
 - name: elem
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(Eq a) => a -> [a] -> Bool"
@@ -526,8 +526,8 @@
 ######################################################################
 
 - name: notElem
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(Eq a) => a -> [a] -> Bool"
@@ -537,8 +537,8 @@
 ######################################################################
 
 - name: lookup
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(Eq a) => a -> [(a, b)] -> Maybe b"
@@ -551,8 +551,8 @@
 ######################################################################
 
 - name: sum
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(Num a) => [a] -> a"
@@ -562,8 +562,8 @@
 ######################################################################
 
 - name: product
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(Num a) => [a] -> a"
@@ -573,8 +573,8 @@
 ######################################################################
 
 - name: maximum
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(Ord a) => [a] -> a"
@@ -585,8 +585,8 @@
 ######################################################################
 
 - name: minimum
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(Ord a) => [a] -> a"
@@ -597,8 +597,8 @@
 ######################################################################
 
 - name: zip
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "[a] -> [b] -> [(a, b)]"
@@ -608,8 +608,8 @@
 ######################################################################
 
 - name: zip3
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "[a] -> [b] -> [c] -> [(a, b, c)]"
@@ -619,8 +619,8 @@
 ######################################################################
 
 - name: zipWith
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> b -> c) -> [a] -> [b] -> [c]"
@@ -631,8 +631,8 @@
 ######################################################################
 
 - name: zipWith3
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "(a -> b -> c -> d) -> [a] -> [b] -> [c] -> [d]"
@@ -643,8 +643,8 @@
 ######################################################################
 
 - name: unzip
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "[(a, b)] -> ([a], [b])"
@@ -654,8 +654,8 @@
 ######################################################################
 
 - name: unzip3
-  package: base
-  modules: [Prelude, Data.List]
+  location:
+    - modules: [Prelude, Data.List]
   implementations:
     - name: report
       type: "[(a, b, c)] -> ([a], [b], [c])"

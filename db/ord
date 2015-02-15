@@ -1,6 +1,6 @@
 - name: class Ord
-  package: base
-  modules: [Prelude, Data.Ord]
+  location:
+    - modules: [Prelude, Data.Ord]
   implementations:
     - name: report
       type: "Eq a => Ord a"
@@ -23,8 +23,8 @@
 ######################################################################
 
 - name: compare
-  package: base
-  modules: [Prelude, Data.Ord]
+  location:
+    - modules: [Prelude, Data.Ord]
   implementations:
     - name: report
       type: "(Ord a) => a -> a -> Ordering"
@@ -38,8 +38,8 @@
 ######################################################################
 
 - name: (<=)
-  package: base
-  modules: [Prelude, Data.Ord]
+  location:
+    - modules: [Prelude, Data.Ord]
   implementations:
     - name: report
       type: "(Ord a) => a -> a -> Bool"
@@ -50,8 +50,8 @@
 ######################################################################
 
 - name: (<)
-  package: base
-  modules: [Prelude, Data.Ord]
+  location:
+    - modules: [Prelude, Data.Ord]
   implementations:
     - name: report
       type: "(Ord a) => a -> a -> Bool"
@@ -62,8 +62,8 @@
 ######################################################################
 
 - name: (>=)
-  package: base
-  modules: [Prelude, Data.Ord]
+  location:
+    - modules: [Prelude, Data.Ord]
   implementations:
     - name: report
       type: "(Ord a) => a -> a -> Bool"
@@ -74,8 +74,8 @@
 ######################################################################
 
 - name: (>)
-  package: base
-  modules: [Prelude, Data.Ord]
+  location:
+    - modules: [Prelude, Data.Ord]
   implementations:
     - name: report
       type: "(Ord a) => a -> a -> Bool"
@@ -86,8 +86,8 @@
 ######################################################################
 
 - name: max
-  package: base
-  modules: [Prelude, Data.Ord]
+  location:
+    - modules: [Prelude, Data.Ord]
   implementations:
     - name: report
       type: "(Ord a) => a -> a -> a"
@@ -100,8 +100,8 @@
 ######################################################################
 
 - name: min
-  package: base
-  modules: [Prelude, Data.Ord]
+  location:
+    - modules: [Prelude, Data.Ord]
   implementations:
     - name: report
       type: "(Ord a) => a -> a -> a"
