@@ -24,29 +24,28 @@ type VersionRanges = [Version]
 -- >>> showVersionRanges ["4.2"]
 -- "since v4.2"
 --
--- >>> showVersionRanges ["", "4.2"]
+-- >>> showVersionRanges ["0", "4.2"]
 -- "removed in v4.2"
 --
 -- >>> showVersionRanges ["1.3.3", "4.2"]
 -- "introduced in v1.3.3, removed in v4.2"
 --
--- >>> showVersionRanges ["", "1.3.3", "4.2"]
+-- >>> showVersionRanges ["0", "1.3.3", "4.2"]
 -- "was removed in v1.3.3, reintroduced in v4.2"
 --
 showVersionRanges :: VersionRanges -> String
 showVersionRanges vs = case vs of
-  []         -> ""
-  [""]       -> ""
-  [v]        -> printf "since v%s" v
-  ["", u]    -> printf "removed in v%s" u
-  [v, u]     -> printf "introduced in v%s, removed in v%s" v u
-  ["", u, v] -> printf "was removed in v%s, reintroduced in v%s" u v
-  vus        -> "present in versions " ++
-                intercalate ", " (map showRange (chunksOf 2 vus))
-                where
-                  showRange ["", u] = "0–" ++ u
-                  showRange [v,  u] = v ++ "–" ++ u
-                  showRange [v]     = v ++ " and onwards"
+  []          -> ""
+  ["0"]       -> ""
+  [v]         -> printf "since v%s" v
+  ["0", u]    -> printf "removed in v%s" u
+  [v, u]      -> printf "introduced in v%s, removed in v%s" v u
+  ["0", u, v] -> printf "was removed in v%s, reintroduced in v%s" u v
+  vus         -> "present in versions " ++
+                 intercalate ", " (map showRange (chunksOf 2 vus))
+                 where
+                   showRange [v, u] = v ++ "–" ++ u
+                   showRange [v]    = v ++ " and onwards"
 
 -- | Location of an 'Entry' – package and modules containing it, along with
 -- versions of the package for which it holds true.
