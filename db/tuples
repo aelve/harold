@@ -1,0 +1,41 @@
+- name: fst
+  package: base
+  modules: [Prelude, Data.Tuple]
+  implementations:
+    - name: report
+      type: "(a, b) -> a"
+      code: |
+        fst (x, y) = x
+
+######################################################################
+
+- name: snd
+  package: base
+  modules: [Prelude, Data.Tuple]
+  implementations:
+    - name: report
+      type: "(a, b) -> b"
+      code: |
+        snd (x, y) = y
+
+######################################################################
+
+- name: curry
+  package: base
+  modules: [Prelude, Data.Tuple]
+  implementations:
+    - name: report
+      type: "((a, b) -> c) -> a -> b -> c"
+      code: |
+        curry f x y = f (x, y)
+
+######################################################################
+
+- name: uncurry
+  package: base
+  modules: [Prelude, Data.Tuple]
+  implementations:
+    - name: report
+      type: "(a -> b -> c) -> ((a, b) -> c)"
+      code: |
+        uncurry f p = f (fst p) (snd p)
