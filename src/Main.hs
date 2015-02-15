@@ -124,6 +124,8 @@ data DataImpl = DataImpl {
     dataImplName         :: String
   -- | A signature (something like "Maybe a").
   , dataImplType         :: String
+  -- | List of automatically derived instances.
+  , dataImplDeriving     :: [String]
   , dataImplConstructors :: [Constructor]
   }
 
@@ -195,6 +197,7 @@ instance FromJSON DataImpl where
   parseJSON (Object v) = DataImpl
     <$> v .:  "name"
     <*> v .:  "type"
+    <*> v .:? "deriving" .!= []
     <*> v .:  "constructors"
   parseJSON _          = mzero
 
@@ -281,12 +284,13 @@ showClassMethod (ClassMethod name signature) =
   name ++ " :: " ++ signature
 
 showDataImpl :: DataImpl -> String
-showDataImpl (DataImpl name signature constrs) = unlines . concat $
+showDataImpl (DataImpl name signature derivs constrs) = unlines . concat $
   [
     [name ++ ":"]
   , ["    data " ++ signature]
   , ["      = " ++ showConstructor c | c <- take 1 constrs]
   , ["      | " ++ showConstructor c | c <- drop 1 constrs]
+  , ["      deriving (" ++ list derivs ++ ")" | not (null derivs)]
   ]
 
 showConstructor :: Constructor -> String

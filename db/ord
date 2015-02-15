@@ -119,6 +119,7 @@
   implementations:
     - name: report
       type: "Ordering"
+      deriving: [Eq, Ord, Enum, Read, Show, Bounded]
       constructors:
         - name: LT
         - name: EQ
