@@ -1,16 +1,25 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Main where
 
 import           Control.Applicative
 import           Control.Monad
-import           Data.List (intercalate, nub)
+import           Data.List (intercalate, nub, isPrefixOf)
 import           Data.List.Split (chunksOf)
 import           Data.Maybe
 import           Data.Yaml
 import qualified System.FilePath.Find as Find
 import           System.IO
 import           Text.Printf
+
+-- | Like 'unwords', but also adds commas.
+--
+-- >>> list ["1", "2", "3"]
+-- "1, 2, 3"
+--
+list :: [String] -> String
+list = intercalate ", "
 
 type Version = String
 
@@ -42,7 +51,7 @@ showVersionRanges vs = case vs of
   [v, u]      -> printf "introduced in v%s, removed in v%s" v u
   ["0", u, v] -> printf "was removed in v%s, reintroduced in v%s" u v
   vus         -> "present in versions " ++
-                 intercalate ", " (map showRange (chunksOf 2 vus))
+                 list (map showRange (chunksOf 2 vus))
                  where
                    showRange [v, u] = v ++ "–" ++ u
                    showRange [v]    = v ++ " and onwards"
@@ -74,8 +83,13 @@ data Entry
     -- | Implementations of the class.
     , classImpls              :: [ClassImpl]
     }
+  | Data {
+      entryName               :: String
+    , entryLocation           :: [Location]
+    , dataImpls               :: [DataImpl]
+    }
 
--- | Implementation of a function.
+-- | Implementation of a function/constructor.
 data FuncImpl = FuncImpl {
   -- | Name (@report@, @naive@, etc.).
     funcImplName        :: String
@@ -83,8 +97,8 @@ data FuncImpl = FuncImpl {
   , funcImplType        :: String
   -- | Asymptotic complexity.
   , funcImplComplexity  :: Maybe String
-  -- | Code.
-  , funcImplCode        :: String
+  -- | Code (can be absent for constructors of class methods).
+  , funcImplCode        :: Maybe String
   }
 
 -- | Implementation of a class.
@@ -105,6 +119,21 @@ data ClassMethod = ClassMethod {
   , classMethodType     :: String
   }
 
+-- | Implementation of a datatype.
+data DataImpl = DataImpl {
+    dataImplName         :: String
+  -- | A signature (something like "Maybe a").
+  , dataImplType         :: String
+  , dataImplConstructors :: [Constructor]
+  }
+
+-- | A datatype constructor.
+data Constructor = Constructor {
+    constructorName      :: String
+  -- | For 'True' it'd be @[]@. For 'Just', @["a"]@.
+  , constructorParams    :: [String]
+  }
+
 -- | The default package name is "base". The default version range is "always
 -- been there".
 instance FromJSON Location where
@@ -115,17 +144,30 @@ instance FromJSON Location where
   parseJSON _          = mzero
 
 instance FromJSON Entry where
-  parseJSON (Object v) = parseFunction <|> parseClass
+  parseJSON (Object v) =
+    -- The order has to be like this because the function parser accepts any
+    -- names, but not other parsers (e.g. parseClass wants the name to start
+    -- with "class").
+    parseClass <|> parseData <|> parseFunction
     where
-      parseFunction = Function
-        <$> v .:  "name"
-        <*> v .:  "location"
-        <*> v .:? "complexity"
-        <*> v .:  "implementations"
-      parseClass = Class
-        <$> v .:  "name"
-        <*> v .:  "location"
-        <*> v .:  "implementations"
+      parseFunction = do
+        entryName      <- v .:  "name"
+        entryLocation  <- v .:  "location"
+        funcComplexity <- v .:? "complexity"
+        funcImpls      <- v .:  "implementations"
+        return Function{..}
+      parseClass = do
+        entryName     <- v .: "name"
+        guard ("class " `isPrefixOf` entryName)
+        entryLocation <- v .: "location"
+        classImpls    <- v .: "implementations"
+        return Class{..}
+      parseData = do
+        entryName     <- v .: "name"
+        guard ("data " `isPrefixOf` entryName)
+        entryLocation <- v .: "location"
+        dataImpls     <- v .: "implementations"
+        return Data{..}
   parseJSON _          = mzero
 
 instance FromJSON FuncImpl where
@@ -133,7 +175,7 @@ instance FromJSON FuncImpl where
     <$> v .:  "name"
     <*> v .:  "type"
     <*> v .:? "complexity"
-    <*> v .:  "code"
+    <*> v .:? "code"
   parseJSON _          = mzero
 
 instance FromJSON ClassImpl where
@@ -149,13 +191,26 @@ instance FromJSON ClassMethod where
     <*> v .:  "type"
   parseJSON _          = mzero
 
+instance FromJSON DataImpl where
+  parseJSON (Object v) = DataImpl
+    <$> v .:  "name"
+    <*> v .:  "type"
+    <*> v .:  "constructors"
+  parseJSON _          = mzero
+
+instance FromJSON Constructor where
+  parseJSON (Object v) = Constructor
+    <$> v .:  "name"
+    <*> v .:? "params" .!= []
+  parseJSON _          = mzero
+
 indent :: Int -> String -> String
 indent n = unlines . map (replicate n ' ' ++) . lines
 
 -- | Produces stuff like "base (Prelude, Data.List); since v4.7.0.0".
 showLocation :: Location -> String
 showLocation (Location package modules versions) =
-  package ++ " (" ++ intercalate ", " modules ++ ")" ++
+  package ++ " (" ++ list modules ++ ")" ++
   if not (null versions) then "; " ++ showVersionRanges versions
                          else ""
 
@@ -188,6 +243,18 @@ showEntry (Class name locs impls) = unlines . concat $
   , [concatMap (indent 2 . showClassImpl) impls]
   ]
 
+showEntry (Data name locs impls) = unlines . concat $
+  [
+    [name]
+  , [""]
+  , ["available from:"]
+  , map (\l -> "  " ++ showLocation l) locs
+  , [""]
+  , ["implementations:"]
+  , [""]
+  , [concatMap (indent 2 . showDataImpl) impls]
+  ]
+
 -- | Show an implementation of a function.
 showFuncImpl
   :: String     -- ^ Function name.
@@ -198,7 +265,7 @@ showFuncImpl funcName (FuncImpl name signature comp code) = unlines . concat $
     [name ++ ":"]
   , ["    -- complexity: " ++ c | Just c <- [comp]]
   , ["    " ++ funcName ++ " :: " ++ signature]
-  , [indent 4 code]
+  , [indent 4 c | Just c <- [code]]
   ]
 
 showClassImpl :: ClassImpl -> String
@@ -212,6 +279,19 @@ showClassImpl (ClassImpl name signature methods) = unlines . concat $
 showClassMethod :: ClassMethod -> String
 showClassMethod (ClassMethod name signature) =
   name ++ " :: " ++ signature
+
+showDataImpl :: DataImpl -> String
+showDataImpl (DataImpl name signature constrs) = unlines . concat $
+  [
+    [name ++ ":"]
+  , ["    data " ++ signature]
+  , ["      = " ++ showConstructor c | c <- take 1 constrs]
+  , ["      | " ++ showConstructor c | c <- drop 1 constrs]
+  ]
+
+showConstructor :: Constructor -> String
+showConstructor (Constructor name params) =
+  unwords (name : params)
 
 main :: IO ()
 main = do

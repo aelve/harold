@@ -110,3 +110,46 @@
         min x y
           | x <= y    = x
           | otherwise = y
+
+######################################################################
+
+- name: data Ordering
+  location:
+    - modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "Ordering"
+      constructors:
+        - name: LT
+        - name: EQ
+        - name: GT
+
+######################################################################
+
+- name: LT
+  location:
+    - modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "Ordering"
+      datatype: Ordering
+
+######################################################################
+
+- name: EQ
+  location:
+    - modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "Ordering"
+      datatype: Ordering
+
+######################################################################
+
+- name: GT
+  location:
+    - modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "Ordering"
+      datatype: Ordering
