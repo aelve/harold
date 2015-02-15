@@ -1,0 +1,112 @@
+- name: class Ord
+  package: base
+  modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "Eq a => Ord a"
+      methods:
+        - name: compare
+          type: "a -> a -> Ordering"
+        - name: (<)
+          type: "a -> a -> Bool"
+        - name: (<=)
+          type: "a -> a -> Bool"
+        - name: (>=)
+          type: "a -> a -> Bool"
+        - name: (>)
+          type: "a -> a -> Bool"
+        - name: max
+          type: "a -> a -> a"
+        - name: min
+          type: "a -> a -> a"
+
+######################################################################
+
+- name: compare
+  package: base
+  modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "(Ord a) => a -> a -> Ordering"
+      class: Ord
+      code: |
+        compare x y
+          | x == y    = EQ
+          | x <= y    = LT
+          | otherwise = GT
+
+######################################################################
+
+- name: (<=)
+  package: base
+  modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "(Ord a) => a -> a -> Bool"
+      class: Ord
+      code: |
+        x <= y = compare x y /= GT
+
+######################################################################
+
+- name: (<)
+  package: base
+  modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "(Ord a) => a -> a -> Bool"
+      class: Ord
+      code: |
+        x < y = compare x y == LT
+
+######################################################################
+
+- name: (>=)
+  package: base
+  modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "(Ord a) => a -> a -> Bool"
+      class: Ord
+      code: |
+        x >= y = compare x y /= LT
+
+######################################################################
+
+- name: (>)
+  package: base
+  modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "(Ord a) => a -> a -> Bool"
+      class: Ord
+      code: |
+        x > y = compare x y == GT
+
+######################################################################
+
+- name: max
+  package: base
+  modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "(Ord a) => a -> a -> a"
+      class: Ord
+      code: |
+        max x y
+          | x <= y    = y
+          | otherwise = x
+
+######################################################################
+
+- name: min
+  package: base
+  modules: [Prelude, Data.Ord]
+  implementations:
+    - name: report
+      type: "(Ord a) => a -> a -> a"
+      class: Ord
+      code: |
+        min x y
+          | x <= y    = x
+          | otherwise = y
