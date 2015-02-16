@@ -1,0 +1,90 @@
+- name: data Bool
+  location:
+    - modules: [Prelude, Data.Bool]
+  implementations:
+    - name: report
+      type: "Bool"
+      deriving: [Eq, Ord, Enum, Read, Show, Bounded]
+      constructors:
+        - name: "True"
+        - name: "False"
+
+######################################################################
+
+- name: "True"
+  location:
+    - modules: [Prelude, Data.Bool]
+  implementations:
+    - name: report
+      type: "Bool"
+      datatype: Bool
+
+######################################################################
+
+- name: "False"
+  location:
+    - modules: [Prelude, Data.Bool]
+  implementations:
+    - name: report
+      type: "Bool"
+      datatype: Bool
+
+######################################################################
+
+- name: (&&)
+  location:
+    - modules: [Prelude, Data.Bool]
+  implementations:
+    - name: report
+      type: "Bool -> Bool -> Bool"
+      code: |
+        True  && x = x
+        False && _ = False
+
+######################################################################
+
+- name: (||)
+  location:
+    - modules: [Prelude, Data.Bool]
+  implementations:
+    - name: report
+      type: "Bool -> Bool -> Bool"
+      code: |
+        True  || _ = True
+        False || x = x
+
+######################################################################
+
+- name: not
+  location:
+    - modules: [Prelude, Data.Bool]
+  implementations:
+    - name: report
+      type: "Bool -> Bool"
+      code: |
+        not True  = False
+        not False = True
+
+######################################################################
+
+- name: otherwise
+  location:
+    - modules: [Prelude, Data.Bool]
+  implementations:
+    - name: report
+      type: "Bool"
+      code: |
+        otherwise = True
+
+######################################################################
+
+- name: bool
+  location:
+    - modules: [Data.Bool]
+      versions: ["4.7"]
+  implementations:
+    - name: ghc
+      type: "a -> a -> Bool -> a"
+      code: |
+        bool f _ False = f
+        bool _ t True  = t
