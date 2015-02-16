@@ -116,6 +116,39 @@ Sample class description:
             - name: min
               type: "a -> a -> a"
 
+Sample datatype description:
+
+    - name: data Maybe
+      location:
+        - modules: [Prelude, Data.Maybe]
+      implementations:
+        - name: report
+          # This is what is between "data" and "=" in "data Maybe a = ...".
+          type: "Maybe a"
+          deriving: [Eq, Ord, Read, Show]
+          constructors:
+            - name: Nothing
+            # Means "Just a".
+            - name: Just
+              params: [a]
+
+    - name: Nothing
+      location:
+        - modules: [Prelude, Data.Maybe]
+      implementations:
+        - name: report
+          type: "Maybe a"
+          # Specifies which datatype the constructor belongs to.
+          datatype: Maybe
+
+    - name: Just
+      location:
+        - modules: [Prelude, Data.Maybe]
+      implementations:
+        - name: report
+          type: "a -> Maybe a"
+          datatype: Maybe
+
 Names for implementations are currently:
 
   * "report" for Haskell Report implementations.
