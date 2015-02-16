@@ -1,3 +1,5 @@
+# Left uncovered: 'Down' from Data.Ord.
+
 - name: class Ord
   location:
     - modules: [Prelude, Data.Ord]
@@ -154,3 +156,15 @@
     - name: report
       type: "Ordering"
       datatype: Ordering
+
+######################################################################
+
+- name: comparing
+  location:
+    - modules: [Data.Ord]
+      versions: ["3"]
+  implementations:
+    - name: ghc
+      type: "(Ord a) => (b -> a) -> b -> b -> Ordering"
+      code: |
+        comparing p x y = compare (p x) (p y)
