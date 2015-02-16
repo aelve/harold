@@ -120,6 +120,7 @@ Names for implementations are currently:
 
   * "report" for Haskell Report implementations.
   * "naive" for naive/teaching implementations.
+  * "ghc" for GHC additions, things added to `base` which aren't in the Report, etc.
   * Anything else is valid for inclusion as well: for instance, one of the
     implementations of `reverse` is called "with accumulator".
 
@@ -129,5 +130,8 @@ Version ranges should be written as follows:
   * `[X]` means that something was available starting from version X.
   * `[A, B, C, D]` means that something was available from A until B,
     then from C until D (i.e. in D it was no longer available).
-  * `[0, A, B]` means that something was removed in A and introduced again in B.
-    So, 0 is a shortcut for "1st version".
+  * `["0", A, B]` means that something was removed in A and introduced again in B.
+    So, "0" is a shortcut for "1st version".
+
+Note that e.g. `4.7` is going to be interpreted as a number, so you should either write `4.7.0.0` or `"4.7"`.
+The latter variant is better.
