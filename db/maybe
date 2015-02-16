@@ -1,0 +1,135 @@
+- name: data Maybe
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "Maybe a"
+      deriving: [Eq, Ord, Read, Show]
+      constructors:
+        - name: Nothing
+        - name: Just
+
+######################################################################
+
+- name: Nothing
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "Maybe a"
+      datatype: Maybe
+
+######################################################################
+
+- name: Just
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "a -> Maybe a"
+      datatype: Maybe
+
+######################################################################
+
+- name: maybe
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "b -> (a -> b) -> Maybe a -> b"
+      code: |
+        maybe n f Nothing  = n
+        maybe n f (Just x) = f x
+
+######################################################################
+
+- name: isJust
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "Maybe a -> Bool"
+      code: |
+        isJust (Just a) = True
+        isJust Nothing  = False
+
+######################################################################
+
+- name: isNothing
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "Maybe a -> Bool"
+      code: |
+        isNothing = not . isJust
+
+######################################################################
+
+- name: fromJust
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "Maybe a -> a"
+      code: |
+        fromJust (Just a) = a
+        fromJust Nothing  = error "Maybe.fromJust: Nothing"
+
+######################################################################
+
+- name: fromMaybe
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "a -> Maybe a -> a"
+      code: |
+        fromMaybe d Nothing  = d
+        fromMaybe d (Just a) = a
+
+######################################################################
+
+- name: maybeToList
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "Maybe a -> [a]"
+      code: |
+        maybeToList Nothing  = []
+        maybeToList (Just a) = [a]
+
+######################################################################
+
+- name: listToMaybe
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "[a] -> Maybe a"
+      code: |
+        listToMaybe []    = Nothing
+        listToMaybe (a:_) = Just a
+
+######################################################################
+
+- name: catMaybes
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "[Maybe a] -> [a]"
+      code: |
+        catMaybes ms = [m | Just m <- ms]
+
+######################################################################
+
+- name: mapMaybe
+  location:
+    - modules: [Prelude, Data.Maybe]
+  implementations:
+    - name: report
+      type: "(a -> Maybe b) -> [a] -> [b]"
+      code: |
+        mapMaybe f = catMaybes . map f
