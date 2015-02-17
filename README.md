@@ -103,17 +103,11 @@ Sample class description:
               # Types have to be written without this class's constraint,
               # like they appear in actual code.
               type: "a -> a -> Ordering"
-            - name: (<)
+              # Several names can be specified. Try to preserve the grouping
+              # which the source had originally.
+            - name: [(<), (<=), (>=), (>)]
               type: "a -> a -> Bool"
-            - name: (<=)
-              type: "a -> a -> Bool"
-            - name: (>=)
-              type: "a -> a -> Bool"
-            - name: (>)
-              type: "a -> a -> Bool"
-            - name: max
-              type: "a -> a -> a"
-            - name: min
+            - name: [max, min]
               type: "a -> a -> a"
 
 Sample datatype description:

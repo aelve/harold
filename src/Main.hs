@@ -108,15 +108,16 @@ data ClassImpl = ClassImpl {
   -- | Type signature.
   , classImplType       :: String
   -- | Methods.
-  , classImplMethods    :: [ClassMethod]
+  , classImplMethods    :: [ClassMethods]
   }
 
--- | Method of a class.
-data ClassMethod = ClassMethod {
-  -- Name of the method.
-    classMethodName     :: String
-  -- | Type signature (without class constraint).
-  , classMethodType     :: String
+-- | Methods of a class (the reason for having several methods in one object
+-- is that we'd like to preserve original grouping of methods).
+data ClassMethods = ClassMethods {
+  -- Names of the methods.
+    classMethodsNames    :: [String]
+  -- | Type signature, common for all methods (without class constraint).
+  , classMethodsType     :: String
   }
 
 -- | Implementation of a datatype.
@@ -187,10 +188,16 @@ instance FromJSON ClassImpl where
     <*> v .:  "methods"
   parseJSON _          = mzero
 
-instance FromJSON ClassMethod where
-  parseJSON (Object v) = ClassMethod
-    <$> v .:  "name"
+instance FromJSON ClassMethods where
+  parseJSON (Object v) = ClassMethods
+    <$> nameOrNames
     <*> v .:  "type"
+    where
+      -- This parses either a single string, or a list of strings. It relies
+      -- on '.:' failing the parse if an object of a different type was encountered.
+      nameOrNames = 
+        fmap (:[]) (v .: "name") <|>    -- Here '.:' expects a single String.
+        (v .: "name")                   -- Here '.:' expects [String].
   parseJSON _          = mzero
 
 instance FromJSON DataImpl where
@@ -276,12 +283,12 @@ showClassImpl (ClassImpl name signature methods) = unlines . concat $
   [
     [name ++ ":"]
   , ["    class " ++ signature ++ " where"]
-  , [concatMap (indent 6 . showClassMethod) methods]
+  , [concatMap (indent 6 . showClassMethods) methods]
   ]
 
-showClassMethod :: ClassMethod -> String
-showClassMethod (ClassMethod name signature) =
-  name ++ " :: " ++ signature
+showClassMethods :: ClassMethods -> String
+showClassMethods (ClassMethods names signature) =
+  list names ++ " :: " ++ signature
 
 showDataImpl :: DataImpl -> String
 showDataImpl (DataImpl name signature derivs constrs) = unlines . concat $
