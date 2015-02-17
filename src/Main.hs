@@ -69,11 +69,6 @@ data Entry
   = Function {
       entryName               :: String
     , entryLocation           :: [Location]
-    -- | Asymptotic complexity of the function. It's not a field of
-    -- 'FunctionImplementation' because we want to distinguish between
-    -- "default" complexity and "weird" complexity, but it's done wrong anyway
-    -- so it should just be removed.
-    , funcComplexity          :: Maybe String
     -- | Implementations of the function.
     , funcImpls               :: [FuncImpl]
     }
@@ -86,6 +81,7 @@ data Entry
   | Data {
       entryName               :: String
     , entryLocation           :: [Location]
+    -- | Implementations of the datatype.
     , dataImpls               :: [DataImpl]
     }
 
@@ -154,22 +150,21 @@ instance FromJSON Entry where
     parseClass <|> parseData <|> parseFunction
     where
       parseFunction = do
-        entryName      <- v .:  "name"
-        entryLocation  <- v .:  "location"
-        funcComplexity <- v .:? "complexity"
-        funcImpls      <- v .:  "implementations"
+        entryName     <- v .:  "name"
+        entryLocation <- v .:  "location"
+        funcImpls     <- v .:  "implementations"
         return Function{..}
       parseClass = do
-        entryName     <- v .: "name"
+        entryName     <- v .:  "name"
         guard ("class " `isPrefixOf` entryName)
-        entryLocation <- v .: "location"
-        classImpls    <- v .: "implementations"
+        entryLocation <- v .:  "location"
+        classImpls    <- v .:  "implementations"
         return Class{..}
       parseData = do
-        entryName     <- v .: "name"
+        entryName     <- v .:  "name"
         guard ("data " `isPrefixOf` entryName)
-        entryLocation <- v .: "location"
-        dataImpls     <- v .: "implementations"
+        entryLocation <- v .:  "location"
+        dataImpls     <- v .:  "implementations"
         return Data{..}
   parseJSON _          = mzero
 
@@ -227,7 +222,7 @@ showLocation (Location package modules versions) =
 -- | Produce a textual description of the entry in the knowledge base.
 showEntry :: Entry -> String
 
-showEntry (Function name locs comp impls) = unlines . concat $
+showEntry (Function name locs impls) = unlines . concat $
   [
     [name]
   , let types = nub (map funcImplType impls)

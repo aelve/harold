@@ -1,10 +1,10 @@
 - name: head
   location:
     - modules: [Prelude, Data.List]
-  complexity: O(1)
   implementations:
     - name: report
       type: "[a] -> a"
+      complexity: O(1)
       code: |
         head (x:_) = x
         head []    = error "Prelude.head: empty list"
@@ -14,10 +14,10 @@
 - name: tail
   location:
     - modules: [Prelude, Data.List]
-  complexity: O(1)
   implementations:
     - name: report
       type: "[a] -> [a]"
+      complexity: O(1)
       code: |
         tail (_:xs) = xs
         tail []     = error "Prelude.tail: empty list"
@@ -27,10 +27,10 @@
 - name: last
   location:
     - modules: [Prelude, Data.List]
-  complexity: O(n)
   implementations:
     - name: report
       type: "[a] -> a"
+      complexity: O(n)
       code: |
         last [x]    = x
         last (_:xs) = last xs
@@ -41,10 +41,10 @@
 - name: init
   location:
     - modules: [Prelude, Data.List]
-  complexity: O(n)
   implementations:
     - name: report
       type: "[a] -> [a]"
+      complexity: O(n)
       code: |
         init [x]    = []
         init (x:xs) = x : init xs
@@ -67,10 +67,10 @@
 - name: (++)
   location:
     - modules: [Prelude, Data.List]
-  complexity: O(n), where n is length of 1st argument
   implementations:
     - name: report
       type: "[a] -> [a] -> [a]"
+      complexity: O(n), where n is length of 1st argument
       code: |
         []     ++ ys = ys
         (x:xs) ++ ys = x : (xs ++ ys)
@@ -93,10 +93,10 @@
 - name: "null"           # Without quotes it's an actual 'null' value.
   location:
     - modules: [Prelude, Data.List]
-  complexity: O(1)
   implementations:
     - name: report
       type: "[a] -> Bool"
+      complexity: O(1)
       code: |
         null []    = True
         null (_:_) = False
@@ -106,10 +106,10 @@
 - name: length
   location:
     - modules: [Prelude, Data.List]
-  complexity: O(n)
   implementations:
     - name: report
       type: "[a] -> Int"
+      complexity: O(n)
       code: |
         length []     = 0
         length (_:xs) = 1 + length xs
@@ -119,10 +119,10 @@
 - name: (!!)
   location:
     - modules: [Prelude, Data.List]
-  complexity: O(index)
   implementations:
     - name: report
       type: "[a] -> Int -> a"
+      complexity: O(index)
       code: |
         xs     !! n | n < 0 = error "Prelude.!!: negative index"
         []     !! _         = error "Prelude.!!: index too large"
@@ -134,10 +134,10 @@
 - name: reverse
   location:
     - modules: [Prelude, Data.List]
-  complexity: O(n)
   implementations:
     - name: report
       type: "[a] -> [a]"
+      complexity: O(n)
       code: |
         reverse = foldl (flip (:)) []
     - name: naive
@@ -148,6 +148,7 @@
         reverse (x:xs) = reverse xs ++ [x]
     - name: with accumulator
       type: "[a] -> [a]"
+      complexity: O(n)
       code: |
         reverse s = rev s []
           where
