@@ -195,7 +195,7 @@ instance FromJSON ClassMethods where
     where
       -- This parses either a single string, or a list of strings. It relies
       -- on '.:' failing the parse if an object of a different type was encountered.
-      nameOrNames = 
+      nameOrNames =
         fmap (:[]) (v .: "name") <|>    -- Here '.:' expects a single String.
         (v .: "name")                   -- Here '.:' expects [String].
   parseJSON _          = mzero

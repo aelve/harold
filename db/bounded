@@ -1,0 +1,31 @@
+- name: class Bounded
+  location:
+    - modules: [Prelude]
+  implementations:
+    - name: report
+      type: "Bounded a"
+      methods:
+        - name: minBound
+          type: "a"
+        - name: maxBound
+          type: "a"
+
+######################################################################
+
+- name: minBound
+  location:
+    - modules: [Prelude]
+  implementations:
+    - name: report
+      type: "Bounded a => a"
+      class: Bounded
+
+######################################################################
+
+- name: maxBound
+  location:
+    - modules: [Prelude]
+  implementations:
+    - name: report
+      type: "Bounded a => a"
+      class: Bounded
