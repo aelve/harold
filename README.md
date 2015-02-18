@@ -29,8 +29,8 @@ They are written in YAML.
 Sample function description (I added blank lines to make reading easier):
 
       # Beware of names like "null" or "[]", which will be interpreted wrongly
-      # by YAML. If unsure, better wrap it in quotes. Operators like "(<)" and
-      # parens in general are usually fine, tho.
+      # by YAML. If unsure, better wrap it in quotes (single or double).
+      # Operators should *not* be wrapped in parens.
     - name: elem
 
       # This field will have several entries if the function was moved between
@@ -71,6 +71,9 @@ Sample function description (I added blank lines to make reading easier):
           # it's an optional field.
           complexity: O(n)
 
+          # Fixity (as it's written in source). This is optional too.
+          fixity: infix 4
+
           # Can be multiline. Also, try to break long lines.
           code: |
             elem x = any (== x)
@@ -105,7 +108,7 @@ Sample class description:
               type: "a -> a -> Ordering"
               # Several names can be specified. Try to preserve the grouping
               # which the source had originally.
-            - name: [(<), (<=), (>=), (>)]
+            - name: ['<', '<=', '>=', '>']
               type: "a -> a -> Bool"
             - name: [max, min]
               type: "a -> a -> a"
