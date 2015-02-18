@@ -1,0 +1,79 @@
+- name: id
+  location:
+    - modules: [Prelude, Data.Function]
+  implementations:
+    - name: report
+      type: "a -> a"
+      code: |
+        id x = x
+
+######################################################################
+
+- name: const
+  location:
+    - modules: [Prelude, Data.Function]
+  implementations:
+    - name: report
+      type: "a -> b -> a"
+      code: |
+        const x _ = x
+
+######################################################################
+
+- name: '.'
+  location:
+    - modules: [Prelude, Data.Function]
+  implementations:
+    - name: report
+      type: "(b -> c) -> (a -> b) -> a -> c"
+      fixity: infixr 9
+      code: |
+        f . g = \x -> f (g x)
+
+######################################################################
+
+- name: flip
+  location:
+    - modules: [Prelude, Data.Function]
+  implementations:
+    - name: report
+      type: "(a -> b -> c) -> b -> a -> c"
+      code: |
+        flip f x y = f y x
+
+######################################################################
+
+- name: '$'
+  location:
+    - modules: [Prelude, Data.Function]
+  implementations:
+    - name: report
+      type: "(a -> b) -> a -> b"
+      fixity: infixr 0
+      code: |
+        f $ x = f x
+
+######################################################################
+
+- name: fix
+  location:
+    - modules: [Data.Function, Control.Monad.Fix]
+      versions: ["3"]
+  implementations:
+    - name: ghc
+      type: "(a -> a) -> a"
+      code: |
+        fix f = let x = f x in x
+
+######################################################################
+
+- name: "on"
+  location:
+    - modules: [Data.Function]
+      versions: ["3"]
+  implementations:
+    - name: ghc
+      type: "(b -> b -> c) -> (a -> b) -> a -> a -> c"
+      fixity: infixl 0
+      code: |
+        (.*.) `on` f = \x y -> f x .*. f y
