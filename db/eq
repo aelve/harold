@@ -5,12 +5,12 @@
     - name: report
       type: "Eq a"
       methods:
-        - name: [(==), (/=)]
+        - name: ['==', '/=']
           type: "a -> a -> Bool"
 
 ######################################################################
 
-- name: (==)
+- name: '=='
   location:
     - modules: [Prelude, Data.Eq]
   implementations:
@@ -23,7 +23,7 @@
 
 ######################################################################
 
-- name: (/=)
+- name: '/='
   location:
     - modules: [Prelude, Data.Eq]
   implementations:

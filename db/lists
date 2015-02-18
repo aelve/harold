@@ -64,7 +64,7 @@
 
 ######################################################################
 
-- name: (++)
+- name: '++'
   location:
     - modules: [Prelude, Data.List]
   implementations:
@@ -117,7 +117,7 @@
 
 ######################################################################
 
-- name: (!!)
+- name: '!!'
   location:
     - modules: [Prelude, Data.List]
   implementations:

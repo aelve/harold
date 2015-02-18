@@ -9,7 +9,7 @@
       methods:
         - name: compare
           type: "a -> a -> Ordering"
-        - name: [(<), (<=), (>=), (>)]
+        - name: ['<', '<=', '>=', '>']
           type: "a -> a -> Bool"
         - name: [max, min]
           type: "a -> a -> a"
@@ -31,7 +31,7 @@
 
 ######################################################################
 
-- name: (<=)
+- name: '<='
   location:
     - modules: [Prelude, Data.Ord]
   implementations:
@@ -44,7 +44,7 @@
 
 ######################################################################
 
-- name: (<)
+- name: '<'
   location:
     - modules: [Prelude, Data.Ord]
   implementations:
@@ -57,7 +57,7 @@
 
 ######################################################################
 
-- name: (>=)
+- name: '>='
   location:
     - modules: [Prelude, Data.Ord]
   implementations:
@@ -70,7 +70,7 @@
 
 ######################################################################
 
-- name: (>)
+- name: '>'
   location:
     - modules: [Prelude, Data.Ord]
   implementations:

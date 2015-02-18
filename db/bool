@@ -31,7 +31,7 @@
 
 ######################################################################
 
-- name: (&&)
+- name: '&&'
   location:
     - modules: [Prelude, Data.Bool]
   implementations:
@@ -44,7 +44,7 @@
 
 ######################################################################
 
-- name: (||)
+- name: '||'
   location:
     - modules: [Prelude, Data.Bool]
   implementations:

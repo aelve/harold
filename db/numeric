@@ -59,7 +59,7 @@
 
 ######################################################################
 
-- name: (^)
+- name: '^'
   location:
     - modules: [Prelude]
   implementations:
@@ -78,7 +78,7 @@
 
 ######################################################################
 
-- name: (^^)
+- name: '^^'
   location:
     - modules: [Prelude]
   implementations:

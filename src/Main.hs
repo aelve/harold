@@ -6,6 +6,7 @@ module Main where
 
 import           Control.Applicative
 import           Control.Monad
+import           Data.Char
 import           Data.List (intercalate, nub, isPrefixOf)
 import           Data.List.Split (chunksOf)
 import           Data.Maybe
@@ -23,6 +24,35 @@ import           Text.Read (readMaybe)
 --
 list :: [String] -> String
 list = intercalate ", "
+
+-- | Check whether the string is an operator, according to Haskell syntax.
+isOperator :: String -> Bool
+isOperator = all isOperatorChar
+  where
+    isOperatorChar c = (isSymbol c || isPunctuation c) &&
+                       (c `notElem` "_'()[]{}\"")
+
+-- | Wrap an operator in parens, leave other names unchanged.
+--
+-- >>> showAsName "+"
+-- "(+)"
+--
+-- >>> showAsName "f"
+-- "f"
+--
+showAsName :: String -> String
+showAsName s = if isOperator s then "(" ++ s ++ ")" else s
+
+-- | Wrap a function in backticks, leave operators unchanged.
+--
+-- >>> showAsOperator "+"
+-- "+"
+--
+-- >>> showAsOperator "f"
+-- "`f`"
+--
+showAsOperator :: String -> String
+showAsOperator s = if isOperator s then s else "`" ++ s ++ "`"
 
 type Version = String
 
@@ -249,7 +279,7 @@ showEntry :: Entry -> String
 
 showEntry (Function name locs impls) = unlines . concat $
   [
-    [name]
+    [showAsName name]
   , let types = nub (map funcImplType impls)
     in  map ("  :: " ++) types
   , [""]
@@ -294,9 +324,10 @@ showFuncImpl funcName (FuncImpl name signature comp fixity code) =
   unlines . concat $
   [
     [name ++ ":"]
-  , ["    " ++ showFixity f ++ " " ++ funcName | Just f <- [fixity]]
+  , ["    " ++ showFixity f ++ " " ++ showAsOperator funcName
+      | Just f <- [fixity]]
   , ["    -- complexity: " ++ c | Just c <- [comp]]
-  , ["    " ++ funcName ++ " :: " ++ signature]
+  , ["    " ++ showAsName funcName ++ " :: " ++ signature]
   , [indent 4 c | Just c <- [code]]
   ]
 
@@ -316,7 +347,7 @@ showClassImpl (ClassImpl name signature methods) = unlines . concat $
 
 showClassMethods :: ClassMethods -> String
 showClassMethods (ClassMethods names signature) =
-  list names ++ " :: " ++ signature
+  list (map showAsName names) ++ " :: " ++ signature
 
 showDataImpl :: DataImpl -> String
 showDataImpl (DataImpl name signature derivs constrs) = unlines . concat $
