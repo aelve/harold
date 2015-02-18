@@ -65,6 +65,7 @@
   implementations:
     - name: report
       type: "(Num a, Integral b) => a -> b -> a"
+      fixity: infixr 8
       code: |
         x ^ 0         = 1
         x ^ n | n > 0 = f x (n-1) x
@@ -83,6 +84,7 @@
   implementations:
     - name: report
       type: "(Fractional a, Integral b) => a -> b -> a"
+      fixity: infixr 8
       code: |
         x ^^ n = if n >= 0 then x^n else recip (x^(-n))
 

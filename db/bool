@@ -37,6 +37,7 @@
   implementations:
     - name: report
       type: "Bool -> Bool -> Bool"
+      fixity: infixr 3
       code: |
         True  && x = x
         False && _ = False
@@ -49,6 +50,7 @@
   implementations:
     - name: report
       type: "Bool -> Bool -> Bool"
+      fixity: infixr 2
       code: |
         True  || _ = True
         False || x = x

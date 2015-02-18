@@ -71,6 +71,7 @@
     - name: report
       type: "[a] -> [a] -> [a]"
       complexity: O(n), where n is length of 1st argument
+      fixity: infixr 5
       code: |
         []     ++ ys = ys
         (x:xs) ++ ys = x : (xs ++ ys)
@@ -123,6 +124,7 @@
     - name: report
       type: "[a] -> Int -> a"
       complexity: O(index)
+      fixity: infixl 9
       code: |
         xs     !! n | n < 0 = error "Prelude.!!: negative index"
         []     !! _         = error "Prelude.!!: index too large"
@@ -521,6 +523,7 @@
   implementations:
     - name: report
       type: "(Eq a) => a -> [a] -> Bool"
+      fixity: infix 4
       code: |
         elem x = any (== x)
 
@@ -532,6 +535,7 @@
   implementations:
     - name: report
       type: "(Eq a) => a -> [a] -> Bool"
+      fixity: infix 4
       code: |
         notElem x = all (/= x)
 

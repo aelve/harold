@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Main where
 
@@ -8,10 +9,12 @@ import           Control.Monad
 import           Data.List (intercalate, nub, isPrefixOf)
 import           Data.List.Split (chunksOf)
 import           Data.Maybe
+import qualified Data.Text as T
 import           Data.Yaml
 import qualified System.FilePath.Find as Find
 import           System.IO
 import           Text.Printf
+import           Text.Read (readMaybe)
 
 -- | Like 'unwords', but also adds commas.
 --
@@ -64,6 +67,10 @@ data Location = Location {
   , locVersions :: VersionRanges
   }
 
+data Fixity = Fixity Int FixityDirection
+
+data FixityDirection = InfixL | InfixR | InfixN
+
 -- | An entry in the knowledge base.
 data Entry
   = Function {
@@ -93,6 +100,8 @@ data FuncImpl = FuncImpl {
   , funcImplType        :: String
   -- | Asymptotic complexity.
   , funcImplComplexity  :: Maybe String
+  -- | Fixity of the function.
+  , funcImplFixity      :: Maybe Fixity
   -- | Code (can be absent for constructors of class methods).
   , funcImplCode        :: Maybe String
   }
@@ -168,11 +177,27 @@ instance FromJSON Entry where
         return Data{..}
   parseJSON _          = mzero
 
+instance FromJSON Fixity where
+  parseJSON (String (T.unpack -> s)) = do
+    let (d, n) = break (== ' ') s
+    dir <- case d of
+      "infixl" -> return InfixL
+      "infixr" -> return InfixR
+      "infix"  -> return InfixN
+      other    -> fail ("unknown fixity: '" ++ other ++ "'")
+    prec <- case readMaybe n of
+      Nothing            -> fail ("couldn't read '" ++ n ++ "' as a number")
+      Just p 
+        | p < 0 || p > 9 -> fail ("precedence can't be " ++ show p)
+        | otherwise      -> return p
+    return (Fixity prec dir)
+ 
 instance FromJSON FuncImpl where
   parseJSON (Object v) = FuncImpl
     <$> v .:  "name"
     <*> v .:  "type"
     <*> v .:? "complexity"
+    <*> v .:? "fixity"
     <*> v .:? "code"
   parseJSON _          = mzero
 
@@ -265,13 +290,21 @@ showFuncImpl
   :: String     -- ^ Function name.
   -> FuncImpl
   -> String
-showFuncImpl funcName (FuncImpl name signature comp code) = unlines . concat $
+showFuncImpl funcName (FuncImpl name signature comp fixity code) =
+  unlines . concat $
   [
     [name ++ ":"]
+  , ["    " ++ showFixity f ++ " " ++ funcName | Just f <- [fixity]]
   , ["    -- complexity: " ++ c | Just c <- [comp]]
   , ["    " ++ funcName ++ " :: " ++ signature]
   , [indent 4 c | Just c <- [code]]
   ]
+
+-- | Produces stuff like "infixl 7".
+showFixity :: Fixity -> String
+showFixity (Fixity prec dir) =
+  case dir of {InfixL -> "infixl"; InfixR -> "infixr"; InfixN -> "infix"} ++
+  " " ++ show prec
 
 showClassImpl :: ClassImpl -> String
 showClassImpl (ClassImpl name signature methods) = unlines . concat $

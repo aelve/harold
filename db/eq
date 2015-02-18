@@ -17,6 +17,7 @@
     - name: report
       type: "(Eq a) => a -> a -> Bool"
       class: Eq
+      fixity: infix 4
       code: |
         x == y = not (x /= y)
 
@@ -29,5 +30,6 @@
     - name: report
       type: "(Eq a) => a -> a -> Bool"
       class: Eq
+      fixity: infix 4
       code: |
         x /= y = not (x == y)
