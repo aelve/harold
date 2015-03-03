@@ -1,6 +1,13 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE
+    OverloadedStrings
+  , RecordWildCards
+  , ViewPatterns
+  , MultiParamTypeClasses
+  , FunctionalDependencies
+  , TypeSynonymInstances
+  , FlexibleInstances
+  , TemplateHaskell
+  #-}
 
 module Main where
 
@@ -12,6 +19,9 @@ import           Data.List.Split (chunksOf)
 import           Data.Maybe
 import qualified Data.Text as T
 import           Data.Yaml
+import           Lens.Micro
+import           Lens.Micro.Each
+import           Lens.Micro.TH
 import qualified System.FilePath.Find as Find
 import           System.IO
 import           Text.Printf
@@ -41,7 +51,9 @@ isOperator = all isOperatorChar
 -- "f"
 --
 showAsName :: String -> String
-showAsName s = if isOperator s then "(" ++ s ++ ")" else s
+showAsName s
+  | isOperator s = "(" ++ s ++ ")"
+  | otherwise    = s
 
 -- | Wrap a function in backticks, leave operators unchanged.
 --
@@ -52,7 +64,9 @@ showAsName s = if isOperator s then "(" ++ s ++ ")" else s
 -- "`f`"
 --
 showAsOperator :: String -> String
-showAsOperator s = if isOperator s then s else "`" ++ s ++ "`"
+showAsOperator s
+  | isOperator s = s
+  | otherwise    = "`" ++ s ++ "`"
 
 type Version = String
 
@@ -92,9 +106,9 @@ showVersionRanges vs = case vs of
 -- | Location of an 'Entry' – package and modules containing it, along with
 -- versions of the package for which it holds true.
 data Location = Location {
-    locPackage  :: String
-  , locModules  :: [String]
-  , locVersions :: VersionRanges
+    locationPackage  :: String
+  , locationModules  :: [String]
+  , locationVersions :: VersionRanges
   }
 
 data Fixity = Fixity Int FixityDirection
@@ -104,44 +118,44 @@ data FixityDirection = InfixL | InfixR | InfixN
 -- | An entry in the knowledge base.
 data Entry
   = Function {
-      entryName               :: String
-    , entryLocation           :: [Location]
+      entryName     :: String
+    , entryLocation :: [Location]
     -- | Implementations of the function.
-    , funcImpls               :: [FuncImpl]
+    , funcImpls     :: [FuncImpl]
     }
   | Class {
-      entryName               :: String
-    , entryLocation           :: [Location]
+      entryName     :: String
+    , entryLocation :: [Location]
     -- | Implementations of the class.
-    , classImpls              :: [ClassImpl]
+    , classImpls    :: [ClassImpl]
     }
   | Data {
-      entryName               :: String
-    , entryLocation           :: [Location]
+      entryName     :: String
+    , entryLocation :: [Location]
     -- | Implementations of the datatype.
-    , dataImpls               :: [DataImpl]
+    , dataImpls     :: [DataImpl]
     }
 
 -- | Implementation of a function/constructor.
 data FuncImpl = FuncImpl {
-  -- | Name (@report@, @naive@, etc.).
-    funcImplName        :: String
+  -- | Genre (@report@, @naive@, etc.).
+    funcImplGenre       :: String
   -- | Type signature.
-  , funcImplType        :: String
+  , funcImplSignature   :: String
   -- | Asymptotic complexity.
   , funcImplComplexity  :: Maybe String
   -- | Fixity of the function.
   , funcImplFixity      :: Maybe Fixity
-  -- | Code (can be absent for constructors of class methods).
-  , funcImplCode        :: Maybe String
+  -- | Source (can be absent for constructors of class methods).
+  , funcImplSource      :: Maybe String
   }
 
 -- | Implementation of a class.
 data ClassImpl = ClassImpl {
-  -- | Name (@report@, @naive@, etc.).
-    classImplName       :: String
-  -- | Type signature.
-  , classImplType       :: String
+  -- | Genre (@report@, @naive@, etc.).
+    classImplGenre      :: String
+  -- | Signature (everything between @class@ and @where@).
+  , classImplSignature  :: String
   -- | Methods.
   , classImplMethods    :: [ClassMethods]
   }
@@ -149,19 +163,21 @@ data ClassImpl = ClassImpl {
 -- | Methods of a class (the reason for having several methods in one object
 -- is that we'd like to preserve original grouping of methods).
 data ClassMethods = ClassMethods {
-  -- Names of the methods.
-    classMethodsNames    :: [String]
+  -- | Names of the methods.
+    classMethodsNames     :: [String]
   -- | Type signature, common for all methods (without class constraint).
-  , classMethodsType     :: String
+  , classMethodsSignature :: String
   }
 
 -- | Implementation of a datatype.
 data DataImpl = DataImpl {
-    dataImplName         :: String
-  -- | A signature (something like "Maybe a").
-  , dataImplType         :: String
+  -- | Genre (@report@, @naive@, etc.).
+    dataImplGenre        :: String
+  -- | A signature (everything between @data@ and @=@).
+  , dataImplSignature    :: String
   -- | List of automatically derived instances.
   , dataImplDeriving     :: [String]
+  -- | Contstructors.
   , dataImplConstructors :: [Constructor]
   }
 
@@ -171,6 +187,14 @@ data Constructor = Constructor {
   -- | For 'True' it'd be @[]@. For 'Just', @["a"]@.
   , constructorParams    :: [String]
   }
+
+makeFields ''Location
+makeFields ''Entry
+makeFields ''FuncImpl
+makeFields ''ClassImpl
+makeFields ''ClassMethods
+makeFields ''DataImpl
+makeFields ''Constructor
 
 -- | The default package name is "base". The default version range is "always
 -- been there".
@@ -217,11 +241,11 @@ instance FromJSON Fixity where
       other    -> fail ("unknown fixity: '" ++ other ++ "'")
     prec <- case readMaybe n of
       Nothing            -> fail ("couldn't read '" ++ n ++ "' as a number")
-      Just p 
+      Just p
         | p < 0 || p > 9 -> fail ("precedence can't be " ++ show p)
         | otherwise      -> return p
     return (Fixity prec dir)
- 
+
 instance FromJSON FuncImpl where
   parseJSON (Object v) = FuncImpl
     <$> v .:  "name"
@@ -280,7 +304,7 @@ showEntry :: Entry -> String
 showEntry (Function name locs impls) = unlines . concat $
   [
     [showAsName name]
-  , let types = nub (map funcImplType impls)
+  , let types = nub (impls ^.. each.signature)
     in  map ("  :: " ++) types
   , [""]
   , ["available from:"]
@@ -320,14 +344,14 @@ showFuncImpl
   :: String     -- ^ Function name.
   -> FuncImpl
   -> String
-showFuncImpl funcName (FuncImpl name signature comp fixity code) =
+showFuncImpl name (FuncImpl genre signature comp fixity code) =
   unlines . concat $
   [
-    [name ++ ":"]
-  , ["    " ++ showFixity f ++ " " ++ showAsOperator funcName
+    [genre ++ ":"]
+  , ["    " ++ showFixity f ++ " " ++ showAsOperator name
       | Just f <- [fixity]]
   , ["    -- complexity: " ++ c | Just c <- [comp]]
-  , ["    " ++ showAsName funcName ++ " :: " ++ signature]
+  , ["    " ++ showAsName name ++ " :: " ++ signature]
   , [indent 4 c | Just c <- [code]]
   ]
 
@@ -338,9 +362,9 @@ showFixity (Fixity prec dir) =
   " " ++ show prec
 
 showClassImpl :: ClassImpl -> String
-showClassImpl (ClassImpl name signature methods) = unlines . concat $
+showClassImpl (ClassImpl genre signature methods) = unlines . concat $
   [
-    [name ++ ":"]
+    [genre ++ ":"]
   , ["    class " ++ signature ++ " where"]
   , [concatMap (indent 6 . showClassMethods) methods]
   ]
@@ -350,9 +374,9 @@ showClassMethods (ClassMethods names signature) =
   list (map showAsName names) ++ " :: " ++ signature
 
 showDataImpl :: DataImpl -> String
-showDataImpl (DataImpl name signature derivs constrs) = unlines . concat $
+showDataImpl (DataImpl genre signature derivs constrs) = unlines . concat $
   [
-    [name ++ ":"]
+    [genre ++ ":"]
   , ["    data " ++ signature]
   , ["      = " ++ showConstructor c | c <- take 1 constrs]
   , ["      | " ++ showConstructor c | c <- drop 1 constrs]
@@ -380,6 +404,6 @@ repl entries = do
   hFlush stdout
   query <- getLine
   unless (query == "/quit") $ do
-    let matching = filter ((== query) . entryName) entries
+    let matching = filter ((== query) . view name) entries
     putStr . intercalate "\n" . map showEntry $ matching
     repl entries
