@@ -1,7 +1,6 @@
 {-# LANGUAGE
     OverloadedStrings
   , RecordWildCards
-  , ViewPatterns
   , MultiParamTypeClasses
   , FunctionalDependencies
   , TypeSynonymInstances
@@ -13,6 +12,7 @@ module Main where
 
 import           Control.Applicative
 import           Control.Monad
+import           Data.Aeson (withObject, withText)
 import           Data.Char
 import           Data.List (intercalate, nub, isPrefixOf)
 import           Data.List.Split (chunksOf)
@@ -199,94 +199,93 @@ makeFields ''Constructor
 -- | The default package name is "base". The default version range is "always
 -- been there".
 instance FromJSON Location where
-  parseJSON (Object v) = Location
-    <$> v .:? "package" .!= "base"
-    <*> v .:  "modules"
-    <*> v .:? "versions" .!= []
-  parseJSON _          = mzero
+  parseJSON = withObject "location" $ \v ->
+    Location
+      <$> v .:? "package" .!= "base"
+      <*> v .:  "modules"
+      <*> v .:? "versions" .!= []
 
 instance FromJSON Entry where
-  parseJSON (Object v) =
+  parseJSON = withObject "entry" $ \v ->
     -- The order has to be like this because the function parser accepts any
     -- names, but not other parsers (e.g. parseClass wants the name to start
     -- with "class").
-    parseClass <|> parseData <|> parseFunction
+    parseClass v <|> parseData v <|> parseFunction v
     where
-      parseFunction = do
+      parseFunction v = do
         entryName     <- v .:  "name"
         entryLocation <- v .:  "location"
         funcImpls     <- v .:  "implementations"
         return Function{..}
-      parseClass = do
+      parseClass v = do
         entryName     <- v .:  "name"
         guard ("class " `isPrefixOf` entryName)
         entryLocation <- v .:  "location"
         classImpls    <- v .:  "implementations"
         return Class{..}
-      parseData = do
+      parseData v = do
         entryName     <- v .:  "name"
         guard ("data " `isPrefixOf` entryName)
         entryLocation <- v .:  "location"
         dataImpls     <- v .:  "implementations"
         return Data{..}
-  parseJSON _          = mzero
 
 instance FromJSON Fixity where
-  parseJSON (String (T.unpack -> s)) = do
-    let (d, n) = break (== ' ') s
+  parseJSON = withText "fixity" $ \s -> do
+    let (d, n) = break (== ' ') (T.unpack s)
     dir <- case d of
       "infixl" -> return InfixL
       "infixr" -> return InfixR
       "infix"  -> return InfixN
       other    -> fail ("unknown fixity: '" ++ other ++ "'")
     prec <- case readMaybe n of
-      Nothing            -> fail ("couldn't read '" ++ n ++ "' as a number")
-      Just p
-        | p < 0 || p > 9 -> fail ("precedence can't be " ++ show p)
-        | otherwise      -> return p
+      Nothing -> fail ("couldn't read '" ++ n ++ "' as a number")
+      Just p  -> return p
+    unless (prec >= 0 && prec <= 9) $
+      fail ("precedence can't be " ++ show prec)
     return (Fixity prec dir)
 
 instance FromJSON FuncImpl where
-  parseJSON (Object v) = FuncImpl
-    <$> v .:  "name"
-    <*> v .:  "type"
-    <*> v .:? "complexity"
-    <*> v .:? "fixity"
-    <*> v .:? "code"
-  parseJSON _          = mzero
+  parseJSON = withObject "function implementation" $ \v ->
+    FuncImpl
+      <$> v .:  "name"
+      <*> v .:  "type"
+      <*> v .:? "complexity"
+      <*> v .:? "fixity"
+      <*> v .:? "code"
 
 instance FromJSON ClassImpl where
-  parseJSON (Object v) = ClassImpl
-    <$> v .:  "name"
-    <*> v .:  "type"
-    <*> v .:  "methods"
-  parseJSON _          = mzero
+  parseJSON = withObject "class implementation" $ \v ->
+    ClassImpl
+      <$> v .:  "name"
+      <*> v .:  "type"
+      <*> v .:  "methods"
 
 instance FromJSON ClassMethods where
-  parseJSON (Object v) = ClassMethods
-    <$> nameOrNames
-    <*> v .:  "type"
+  parseJSON = withObject "class methods" $ \v ->
+    ClassMethods
+      <$> nameOrNames v
+      <*> v .:  "type"
     where
       -- This parses either a single string, or a list of strings. It relies
       -- on '.:' failing the parse if an object of a different type was encountered.
-      nameOrNames =
+      nameOrNames v =
         fmap (:[]) (v .: "name") <|>    -- Here '.:' expects a single String.
         (v .: "name")                   -- Here '.:' expects [String].
-  parseJSON _          = mzero
 
 instance FromJSON DataImpl where
-  parseJSON (Object v) = DataImpl
-    <$> v .:  "name"
-    <*> v .:  "type"
-    <*> v .:? "deriving" .!= []
-    <*> v .:  "constructors"
-  parseJSON _          = mzero
+  parseJSON = withObject "datatype implementation" $ \v ->
+    DataImpl
+      <$> v .:  "name"
+      <*> v .:  "type"
+      <*> v .:? "deriving" .!= []
+      <*> v .:  "constructors"
 
 instance FromJSON Constructor where
-  parseJSON (Object v) = Constructor
-    <$> v .:  "name"
-    <*> v .:? "params" .!= []
-  parseJSON _          = mzero
+  parseJSON = withObject "datatype constructor" $ \v ->
+    Constructor
+      <$> v .:  "name"
+      <*> v .:? "params" .!= []
 
 indent :: Int -> String -> String
 indent n = unlines . map (replicate n ' ' ++) . lines
