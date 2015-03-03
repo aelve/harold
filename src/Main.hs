@@ -10,22 +10,28 @@
 
 module Main where
 
+-- Generic useful stuff.
 import           Control.Applicative
 import           Control.Monad
-import           Data.Aeson (withObject, withText)
-import           Data.Char
-import           Data.List (intercalate, nub, isPrefixOf)
-import           Data.List.Split (chunksOf)
 import           Data.Maybe
-import qualified Data.Text as T
+-- Yaml parsing.
+import           Data.Aeson (withObject, withText)
 import           Data.Yaml
+-- Lenses.
 import           Lens.Micro
 import           Lens.Micro.Each
 import           Lens.Micro.TH
+-- IO.
 import qualified System.FilePath.Find as Find
 import           System.IO
+-- Text.
+import qualified Data.Text as T
 import           Text.Printf
 import           Text.Read (readMaybe)
+import           Data.Char
+-- Lists.
+import           Data.List (intercalate, nub, isPrefixOf)
+import           Data.List.Split (chunksOf)
 
 -- | Like 'unwords', but also adds commas.
 --
