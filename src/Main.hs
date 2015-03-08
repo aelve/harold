@@ -13,6 +13,7 @@ module Main where
 -- Generic useful stuff.
 import           Control.Applicative
 import           Control.Monad
+import           Data.Foldable (for_)
 import           Data.Maybe
 -- Yaml parsing.
 import           Data.Aeson (withObject, withText)
@@ -30,8 +31,10 @@ import           Text.Printf
 import           Text.Read (readMaybe)
 import           Data.Char
 -- Lists.
-import           Data.List (intercalate, nub, isPrefixOf)
+import           Data.List (intersperse, intercalate, nub, isPrefixOf)
 import           Data.List.Split (chunksOf)
+-- Harold-specific.
+import           Harold.TextOutput
 
 -- | Like 'unwords', but also adds commas.
 --
@@ -293,100 +296,118 @@ instance FromJSON Constructor where
       <$> v .:  "name"
       <*> v .:? "params" .!= []
 
-indent :: Int -> String -> String
-indent n = unlines . map (replicate n ' ' ++) . lines
-
 -- | Produces stuff like "base (Prelude, Data.List); since v4.7.0.0".
-showLocation :: Location -> String
-showLocation (Location package modules versions) =
-  package ++ " (" ++ list modules ++ ")" ++
-  if not (null versions) then "; " ++ showVersionRanges versions
-                         else ""
+showLocation :: Location -> TextOutput
+showLocation (Location package modules versions) = do
+  line [package, " (", list modules, ")"]
+  unless (null versions) $
+    line ["; ", showVersionRanges versions]
 
 -- | Produce a textual description of the entry in the knowledge base.
-showEntry :: Entry -> String
+showEntry :: Entry -> TextOutput
 
-showEntry (Function name locs impls) = unlines . concat $
-  [
-    [showAsName name]
-  , let types = nub (impls ^.. each.signature)
-    in  map ("  :: " ++) types
-  , [""]
-  , ["available from:"]
-  , map (\l -> "  " ++ showLocation l) locs
-  , [""]
-  , ["implementations:"]
-  , [""]
-  , map (indent 2 . showFuncImpl name) impls
-  ]
+showEntry (Function name locs impls) = do
+  line1 (showAsName name)
+  let signatures = nub (impls ^.. each.signature)
+  indent 2 $
+    mapM_ (\s -> line [":: ", s]) signatures
+  blank
 
-showEntry (Class name locs impls) = unlines . concat $
-  [
-    [name]
-  , [""]
-  , ["available from:"]
-  , map (\l -> "  " ++ showLocation l) locs
-  , [""]
-  , ["implementations:"]
-  , [""]
-  , [concatMap (indent 2 . showClassImpl) impls]
-  ]
+  line1 "available from:"
+  indent 2 $
+    mapM_ showLocation locs
+  blank
 
-showEntry (Data name locs impls) = unlines . concat $
-  [
-    [name]
-  , [""]
-  , ["available from:"]
-  , map (\l -> "  " ++ showLocation l) locs
-  , [""]
-  , ["implementations:"]
-  , [""]
-  , [concatMap (indent 2 . showDataImpl) impls]
-  ]
+  line1 "implementations:"
+  blank
+
+  indent 2 $
+    sequence_ . intersperse blank $
+      map (showFuncImpl name) impls
+
+showEntry (Class name locs impls) = do
+  line1 name
+  blank
+
+  line1 "available from:"
+  indent 2 $
+    mapM_ showLocation locs
+  blank
+
+  line1 "implementations:"
+  blank
+
+  indent 2 $
+    sequence_ . intersperse blank $
+      map showClassImpl impls
+
+showEntry (Data name locs impls) = do
+  line1 name
+  blank
+
+  line1 "available from:"
+  indent 2 $
+    mapM_ showLocation locs
+  blank
+
+  line1 "implementations:"
+  blank
+
+  indent 2 $
+    sequence_ . intersperse blank $
+      map showDataImpl impls
 
 -- | Show an implementation of a function.
 showFuncImpl
   :: String     -- ^ Function name.
   -> FuncImpl
-  -> String
-showFuncImpl name (FuncImpl genre signature comp fixity code) =
-  unlines . concat $
-  [
-    [genre ++ ":"]
-  , ["    " ++ showFixity f ++ " " ++ showAsOperator name
-      | Just f <- [fixity]]
-  , ["    -- complexity: " ++ c | Just c <- [comp]]
-  , ["    " ++ showAsName name ++ " :: " ++ signature]
-  , [indent 4 c | Just c <- [code]]
-  ]
+  -> TextOutput
+showFuncImpl name (FuncImpl genre signature comp fixity code) = do
+  line [genre, ":"]
+  indent 4 $ do
+    for_ fixity $ \f ->
+      line [showFixity f, " ", showAsOperator name]
+    for_ comp $ \c ->
+      line ["-- complexity: ", c]
+    line [showAsName name, " :: ", signature]
+    mapM_ line1 (maybe [] lines code)
+
+showFixityDirection :: FixityDirection -> String
+showFixityDirection d = case d of
+  InfixL -> "infixl"
+  InfixR -> "infixr"
+  InfixN -> "infix"
 
 -- | Produces stuff like "infixl 7".
 showFixity :: Fixity -> String
 showFixity (Fixity prec dir) =
-  case dir of {InfixL -> "infixl"; InfixR -> "infixr"; InfixN -> "infix"} ++
-  " " ++ show prec
+  showFixityDirection dir ++ " " ++ show prec
 
-showClassImpl :: ClassImpl -> String
-showClassImpl (ClassImpl genre signature methods) = unlines . concat $
-  [
-    [genre ++ ":"]
-  , ["    class " ++ signature ++ " where"]
-  , [concatMap (indent 6 . showClassMethods) methods]
-  ]
+showClassImpl :: ClassImpl -> TextOutput
+showClassImpl (ClassImpl genre signature methods) = do
+  line [genre, ":"]
+  indent 4 $ do
+    line ["class ", signature, " where"]
+    indent 2 $
+      mapM_ showClassMethods methods
 
-showClassMethods :: ClassMethods -> String
+showClassMethods :: ClassMethods -> TextOutput
 showClassMethods (ClassMethods names signature) =
-  list (map showAsName names) ++ " :: " ++ signature
+  line [list (map showAsName names), " :: ", signature]
 
-showDataImpl :: DataImpl -> String
-showDataImpl (DataImpl genre signature derivs constrs) = unlines . concat $
-  [
-    [genre ++ ":"]
-  , ["    data " ++ signature]
-  , ["      = " ++ showConstructor c | c <- take 1 constrs]
-  , ["      | " ++ showConstructor c | c <- drop 1 constrs]
-  , ["      deriving (" ++ list derivs ++ ")" | not (null derivs)]
-  ]
+showDataImpl :: DataImpl -> TextOutput
+showDataImpl (DataImpl genre signature derivs constrs) = do
+  line [genre, ":"]
+  indent 4 $ do
+    line ["data ", signature]
+    indent 2 $ do
+      case constrs of
+        []      -> return ()
+        (c1:cs) -> do
+          line ["= ", showConstructor c1]
+          mapM_ (\c -> line ["| ", showConstructor c]) cs
+      unless (null derivs) $
+        line ["deriving (", list derivs, ")"]
 
 showConstructor :: Constructor -> String
 showConstructor (Constructor name params) =
@@ -410,5 +431,7 @@ repl entries = do
   query <- getLine
   unless (query == "/quit") $ do
     let matching = filter ((== query) . view name) entries
-    putStr . intercalate "\n" . map showEntry $ matching
+    putStr . getText .
+      sequence_ . intersperse blank .
+      map showEntry $ matching
     repl entries
