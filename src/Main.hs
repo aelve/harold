@@ -77,6 +77,7 @@ showAsOperator s
   | isOperator s = s
   | otherwise    = "`" ++ s ++ "`"
 
+-- | Package version.
 type Version = String
 
 -- | Version ranges in which a function or whatever was available. The 1st
@@ -120,9 +121,14 @@ data Location = Location {
   , locationVersions :: VersionRanges
   }
 
+-- | Haskell operator fixity (precedence + associativity).
 data Fixity = Fixity Int FixityDirection
 
-data FixityDirection = InfixL | InfixR | InfixN
+-- | Haskell operator associativity.
+data FixityDirection
+  = InfixL            -- ^ Left-associative.
+  | InfixR            -- ^ Right-associative.
+  | InfixN            -- ^ Non-associative.
 
 -- | An entry in the knowledge base.
 data Entry
@@ -277,7 +283,8 @@ instance FromJSON ClassMethods where
       <*> v .:  "type"
     where
       -- This parses either a single string, or a list of strings. It relies
-      -- on '.:' failing the parse if an object of a different type was encountered.
+      -- on '.:' failing the parse if an object of a different type was
+      -- encountered.
       nameOrNames v =
         fmap (:[]) (v .: "name") <|>    -- Here '.:' expects a single String.
         (v .: "name")                   -- Here '.:' expects [String].
