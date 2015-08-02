@@ -20,7 +20,6 @@ import           Data.Aeson (withObject, withText)
 import           Data.Yaml
 -- Lenses.
 import           Lens.Micro
-import           Lens.Micro.Each
 import           Lens.Micro.TH
 -- IO.
 import qualified System.FilePath.Find as Find

@@ -31,9 +31,8 @@ executable harold
                      , text
                      , split
                      , mtl
-                     , microlens ==0.1.*
+                     , microlens >=0.1.2 && <0.2
                      , microlens-th
-                     , microlens-each
                      , filemanip
   hs-source-dirs:      src
   default-language:    Haskell2010
