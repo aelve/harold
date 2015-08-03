@@ -1,11 +1,11 @@
 {-# LANGUAGE
-    OverloadedStrings
-  , RecordWildCards
-  , MultiParamTypeClasses
-  , FunctionalDependencies
-  , TypeSynonymInstances
-  , FlexibleInstances
-  , TemplateHaskell
+OverloadedStrings,
+RecordWildCards,
+MultiParamTypeClasses,
+FunctionalDependencies,
+TypeSynonymInstances,
+FlexibleInstances,
+TemplateHaskell
   #-}
 
 module Main where
